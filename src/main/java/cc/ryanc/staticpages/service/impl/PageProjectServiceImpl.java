@@ -5,12 +5,16 @@ import static cc.ryanc.staticpages.utils.FileUtils.deleteFileSilently;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 import cc.ryanc.staticpages.extensions.Project;
+import cc.ryanc.staticpages.model.ProjectFile;
 import cc.ryanc.staticpages.model.UploadContext;
 import cc.ryanc.staticpages.service.PageProjectService;
 import cc.ryanc.staticpages.utils.FileUtils;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -18,6 +22,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,17 +36,94 @@ public class PageProjectServiceImpl implements PageProjectService {
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
 
+    private static String getType(File file) {
+        String name = file.getName();
+        if (file.isDirectory()) {
+            return "directory";
+        } else {
+            int lastIndexOf = name.lastIndexOf(".");
+            if (lastIndexOf == -1) {
+                // empty extension
+                return "";
+            }
+            return name.substring(lastIndexOf + 1);
+        }
+    }
+
+    private static Flux<ProjectFile> doListFiles(Path pathToList) {
+        return Flux.<ProjectFile>create(sink -> {
+                File directory = pathToList.toFile();
+                if (!directory.exists() || !directory.isDirectory()) {
+                    sink.error(new ServerWebInputException("The path is not a directory."));
+                    return;
+                }
+                File[] files = directory.listFiles();
+                if (files == null) {
+                    sink.complete();
+                    return;
+                }
+                for (File file : files) {
+                    if (sink.isCancelled()) {
+                        break;
+                    }
+                    var projectFile = new ProjectFile()
+                        .setPath(file.getAbsolutePath())
+                        .setDirectory(file.isDirectory())
+                        .setName(file.getName())
+                        .setSize(file.length())
+                        .setType(getType(file))
+                        .setCanRead(file.canRead())
+                        .setCanWrite(file.canWrite())
+                        .setLastModifiedTime(Instant.ofEpochMilli(file.lastModified()));
+                    sink.next(projectFile);
+                }
+                sink.complete();
+            })
+            .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    static Path concatPath(Path root, String... segments) {
+        if (segments.length == 0) {
+            return root;
+        }
+        var path = Paths.get(root.toString(), segments);
+        checkDirectoryTraversal(root, path);
+        return path;
+    }
+
+    @NonNull
+    static String[] pathSegments(String dir) {
+        if (StringUtils.isBlank(dir)) {
+            return new String[0];
+        }
+        return StringUtils.split(dir, "/");
+    }
+
     @Override
     public Mono<Path> upload(UploadContext uploadContext) {
         return client.get(Project.class, uploadContext.getName())
-            .map(staticPage -> {
-                var dist = staticPage.getSpec().getDirectory();
-                return determineStorePath(dist, uploadContext.getDir());
-            })
+            .map(project -> extractProjectFilePath(project, uploadContext.getDir()))
             .flatMap(storePath -> writeToFile(storePath, uploadContext));
     }
 
-    Mono<Path> writeToFile(Path storePath, UploadContext uploadContext) {
+    @Override
+    public Flux<ProjectFile> listFiles(String name, String directoryPath) {
+        return client.get(Project.class, name)
+            .map(project -> extractProjectFilePath(project, directoryPath))
+            .flatMapMany(PageProjectServiceImpl::doListFiles);
+    }
+
+    Path extractProjectFilePath(Project project, String extractPath) {
+        var segments = pathSegments(extractPath);
+        return concatPath(determineProjectPath(project.getSpec().getDirectory()), segments);
+    }
+
+    private Path determineProjectPath(String projectDir) {
+        Assert.notNull(projectDir, "The projectDir must not be null.");
+        return concatPath(getStaticRootPath(), pathSegments(projectDir));
+    }
+
+    private Mono<Path> writeToFile(Path storePath, UploadContext uploadContext) {
         return Mono.fromCallable(() -> {
                 try {
                     Files.createDirectories(storePath);
@@ -70,25 +152,7 @@ public class PageProjectServiceImpl implements PageProjectService {
             .thenReturn(targetPath);
     }
 
-    Path determineStorePath(@NonNull String dist, String dir) {
-        Assert.notNull(dist, "The dist must not be null.");
-
-        var uploadRoot = getStaticRootPath();
-        var storePath = StringUtils.isBlank(dir) ? uploadRoot.resolve(dist)
-            : uploadRoot.resolve(dir);
-
-        if (StringUtils.isNotBlank(dir)) {
-            var segments = StringUtils.split(dir, "/");
-            for (String segment : segments) {
-                storePath = storePath.resolve(segment);
-            }
-        }
-
-        checkDirectoryTraversal(uploadRoot, storePath);
-        return storePath;
-    }
-
-    Path getStaticRootPath() {
+    private Path getStaticRootPath() {
         return backupRootGetter.get().getParent().resolve("static");
     }
 }
