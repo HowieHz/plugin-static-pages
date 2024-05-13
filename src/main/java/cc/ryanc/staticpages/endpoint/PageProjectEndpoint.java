@@ -6,17 +6,18 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.BooleanUtils.toBooleanObject;
 import static org.springdoc.core.fn.builders.apiresponse.Builder.responseBuilder;
 import static org.springdoc.core.fn.builders.content.Builder.contentBuilder;
+import static org.springdoc.core.fn.builders.parameter.Builder.parameterBuilder;
 import static org.springdoc.core.fn.builders.requestbody.Builder.requestBodyBuilder;
 import static org.springdoc.core.fn.builders.schema.Builder.schemaBuilder;
 import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
 
+import cc.ryanc.staticpages.model.ProjectFile;
 import cc.ryanc.staticpages.model.UploadContext;
 import cc.ryanc.staticpages.service.PageProjectService;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.fn.builders.parameter.Builder;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
@@ -26,8 +27,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebInputException;
+import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
 
@@ -56,7 +59,7 @@ public class PageProjectEndpoint implements CustomEndpoint {
                 builder -> builder
                     .operationId("UploadFileToProject")
                     .tag(tag)
-                    .parameter(Builder.parameterBuilder()
+                    .parameter(parameterBuilder()
                         .in(ParameterIn.PATH)
                         .name("name")
                         .required(true)
@@ -70,7 +73,29 @@ public class PageProjectEndpoint implements CustomEndpoint {
                     .response(responseBuilder().implementation(Path.class))
                     .build()
             )
+            .GET("/projects/{name}/files", this::listFiles, builder -> builder
+                .operationId("ListFilesInProject")
+                .tag(tag)
+                .parameter(parameterBuilder()
+                    .in(ParameterIn.PATH)
+                    .name("name")
+                    .required(true)
+                )
+                .parameter(parameterBuilder()
+                    .in(ParameterIn.QUERY)
+                    .required(false)
+                    .name("path")
+                )
+                .response(responseBuilder().implementation(String.class))
+            )
             .build();
+    }
+
+    private Mono<ServerResponse> listFiles(ServerRequest serverRequest) {
+        final var projectName = serverRequest.pathVariable("name");
+        final var path = serverRequest.queryParam("path").orElse(null);
+        var files = pageProjectService.listFiles(projectName, path);
+        return ServerResponse.ok().body(files, ProjectFile.class);
     }
 
     @Override
