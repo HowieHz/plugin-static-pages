@@ -25,6 +25,8 @@ public class Project extends AbstractExtension {
         @Schema(requiredMode = REQUIRED, minLength = 1)
         private String title;
 
+        private String icon;
+
         private String description;
 
         @Schema(requiredMode = REQUIRED, minLength = 1)

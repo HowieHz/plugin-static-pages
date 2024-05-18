@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { Project } from "@/types";
-import { VButton, VSpace, VStatusDot } from "@halo-dev/components";
+import { VAvatar, VButton, VSpace, VStatusDot } from "@halo-dev/components";
 import { ref } from "vue";
 import ProjectEditModal from "./ProjectEditModal.vue";
 
@@ -29,6 +29,8 @@ const editModalVisible = ref(false);
     class="sp-cursor-pointer sp-rounded-lg sp-space-y-4 sp-bg-white sp-flex sp-flex-col sp-px-4 sp-py-3 sp-group sp-shadow sp-transition-all hover:sp-ring-1"
   >
     <div class="sp-flex sp-items-center sp-gap-4 sp-flex-none">
+      <VAvatar :src="project.spec.icon" :alt="project.spec.title" size="xs" />
+
       <RouterLink
         :to="{
           name: 'StaticPageProjectDetail',

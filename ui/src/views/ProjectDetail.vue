@@ -3,6 +3,7 @@ import type { Project } from "@/types";
 import { apiClient } from "@/utils/api-client";
 import {
   IconSettings,
+  VAvatar,
   VButton,
   VCard,
   VLoading,
@@ -13,7 +14,6 @@ import {
 import { useQuery } from "@tanstack/vue-query";
 import { markRaw, ref, type Component, type Raw } from "vue";
 import { useRoute } from "vue-router";
-import CarbonWebServicesContainer from "~icons/carbon/web-services-container";
 import Detail from "./tabs/Detail.vue";
 import Files from "./tabs/Files.vue";
 import { useRouteQuery } from "@vueuse/router";
@@ -67,7 +67,12 @@ const editModalVisible = ref(false);
   />
   <VPageHeader :title="data?.spec.title || '加载中...'">
     <template #icon>
-      <CarbonWebServicesContainer class="sp-mr-2 sp-self-center" />
+      <VAvatar
+        :src="data?.spec.icon"
+        class="sp-mr-2 sp-self-center"
+        :alt="data?.spec.title"
+        size="xs"
+      />
     </template>
     <template #actions>
       <VSpace>

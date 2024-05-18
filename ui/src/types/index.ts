@@ -9,6 +9,7 @@ export interface Project {
 
 export interface Spec {
   title: string;
+  icon?: string;
   description?: string;
   directory: string;
   rewrites?: ProjectRewrite[];

@@ -26,6 +26,7 @@ function onSubmit(data: ProjectFormState) {
     name="static-page-project-form"
     :config="{ validationVisibility: 'submit' }"
     @submit="onSubmit"
+    #default="{ value }"
   >
     <FormKit
       type="text"
@@ -39,12 +40,19 @@ function onSubmit(data: ProjectFormState) {
       name="directory"
       :model-value="formState?.directory"
       label="目录"
-      help="/{目录}"
+      :help="value.directory ? `访问地址为：/${value.directory}` : ''"
       validation="required:trim|matches:/^\S(.*\S)?$/"
       :validation-messages="{
         matches: '不能以空格开头或结尾',
       }"
     ></FormKit>
+    <FormKit
+      type="attachment"
+      name="icon"
+      label="图标"
+      :model-value="formState?.icon"
+    >
+    </FormKit>
     <FormKit
       type="textarea"
       name="description"

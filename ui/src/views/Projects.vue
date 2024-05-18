@@ -44,7 +44,7 @@ const creationModalVisible = ref(false);
     <VLoading v-if="isLoading" />
     <Transition v-else appear name="fade">
       <div
-        class="sp-grid sp-grid-cols-1 sp-gap-3 sm:sp-grid-cols-2 md:sp-grid-cols-3 xl:sp-grid-cols-5"
+        class="sp-grid sp-grid-cols-1 sp-gap-3 sm:sp-grid-cols-2 lg:sp-grid-cols-3 xl:sp-grid-cols-4 2xl:sp-grid-cols-5"
       >
         <ProjectCard
           v-for="project in data?.items"

@@ -31,6 +31,7 @@ const { mutate, isLoading } = useMutation({
       },
       spec: {
         title: data.title,
+        icon: data.icon,
         directory: data.directory,
         description: data.description,
         rewrites: data.rewrites,
