@@ -140,7 +140,7 @@ function onUploadModalClose() {
   <FileUploadModal
     v-if="uploadModalVisible"
     :project="project"
-    :path="selectedDi"
+    :path="selectedDir"
     @close="onUploadModalClose"
   />
 
@@ -182,7 +182,17 @@ function onUploadModalClose() {
       <VButton type="secondary" @click="uploadModalVisible = true">
         上传
       </VButton>
-      <VButton type="default">编辑</VButton>
+      <VButton
+        type="default"
+        @click="
+          $router.push({
+            name: 'StaticPageFilesEditor',
+            params: { name: project.metadata.name },
+          })
+        "
+      >
+        编辑
+      </VButton>
       <VButton type="danger" @click="handleCleanup">清空</VButton>
     </VSpace>
   </div>

@@ -12,7 +12,7 @@ import {
   VTabbar,
 } from "@halo-dev/components";
 import { useQuery } from "@tanstack/vue-query";
-import { markRaw, ref, type Component, type Raw } from "vue";
+import { type Component, markRaw, type Raw, ref } from "vue";
 import { useRoute } from "vue-router";
 import Detail from "./tabs/Detail.vue";
 import Files from "./tabs/Files.vue";
@@ -27,7 +27,7 @@ interface Tab {
 
 const route = useRoute();
 
-const { data, isLoading } = useQuery<Project>({
+const { data: project, isLoading } = useQuery<Project>({
   queryKey: ["plugin-static-pages:detail", route.params.name],
   queryFn: async () => {
     const { data } = await apiClient.get<Project>(
@@ -53,7 +53,7 @@ const tabs: Tab[] = [
 const activeTab = useRouteQuery("tab", tabs[0].id);
 
 function handleOpen() {
-  window.open(`/${data.value?.spec.directory}`, "_blank");
+  window.open(`/${project.value?.spec.directory}`, "_blank");
 }
 
 const editModalVisible = ref(false);
@@ -61,22 +61,22 @@ const editModalVisible = ref(false);
 
 <template>
   <ProjectEditModal
-    v-if="editModalVisible && data"
-    :project="data"
+    v-if="editModalVisible && project"
+    :project="project"
     @close="editModalVisible = false"
   />
-  <VPageHeader :title="data?.spec.title || '加载中...'">
+  <VPageHeader :title="project?.spec.title || '加载中...'">
     <template #icon>
       <VAvatar
-        :src="data?.spec.icon"
+        :src="project?.spec.icon"
         class="sp-mr-2 sp-self-center"
-        :alt="data?.spec.title"
+        :alt="project?.spec.title"
         size="xs"
       />
     </template>
     <template #actions>
       <VSpace>
-        <VButton size="sm" @click="handleOpen"> 访问 </VButton>
+        <VButton size="sm" @click="handleOpen"> 访问</VButton>
         <VButton @click="editModalVisible = true">
           <template #icon>
             <IconSettings class="sp-h-full sp-w-full" />
@@ -104,7 +104,7 @@ const editModalVisible = ref(false);
           <component
             :is="tab.component"
             v-if="activeTab === tab.id"
-            :project="data"
+            :project="project"
           />
         </template>
       </div>

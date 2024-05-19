@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useQuery } from "@tanstack/vue-query";
 import { apiClient } from "@/utils/api-client";
-import { VPageHeader, VLoading, IconAddCircle } from "@halo-dev/components";
+import { IconAddCircle, VLoading, VPageHeader } from "@halo-dev/components";
 import CarbonWebServicesContainer from "~icons/carbon/web-services-container";
 import type { ListResponse, Project } from "@/types";
 import ProjectCard from "@/components/ProjectCard.vue";
