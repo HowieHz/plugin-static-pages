@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import type { Project } from "@/types";
+import { normalizePath } from "@/utils/path";
 import { VButton, VSpace } from "@halo-dev/components";
 import { useLocalStorage } from "@vueuse/core";
 import { computed } from "vue";
 import RiMenuFoldLine from "~icons/ri/menu-fold-line";
 import RiMenuUnfoldLine from "~icons/ri/menu-unfold-line";
 
-const SUPPORTED_FILES = [
+const SUPPORTED_EDIT_FILES = [
   ".md",
   ".html",
   ".htm",
@@ -17,17 +18,33 @@ const SUPPORTED_FILES = [
   ".xml",
 ];
 
+const IMAGE_FILES = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+
 const props = withDefaults(defineProps<{ project: Project; path?: string }>(), {
   path: undefined,
 });
 
 const showSidebar = useLocalStorage("plugin-static-pages:show-sidebar", true);
 
-const isSupported = computed(() => {
+const isEditableFile = computed(() => {
   if (!props.path) {
     return false;
   }
-  return SUPPORTED_FILES.some((ext) => props.path?.endsWith(ext));
+  return SUPPORTED_EDIT_FILES.some((ext) => props.path?.endsWith(ext));
+});
+
+const isImageFile = computed(() => {
+  if (!props.path) {
+    return false;
+  }
+  return IMAGE_FILES.some((ext) => props.path?.endsWith(ext));
+});
+
+const fullPath = computed(() => {
+  if (!props.path) {
+    return "";
+  }
+  return normalizePath("/", props.project.spec.directory, props.path);
 });
 </script>
 
@@ -48,20 +65,30 @@ const isSupported = computed(() => {
         {{ path }}
       </span>
     </VSpace>
-    <VSpace v-if="path && isSupported">
+    <VSpace v-if="path && isEditableFile">
       <VButton type="secondary"> 保存</VButton>
     </VSpace>
   </div>
   <div
-    v-if="!path || !isSupported"
+    v-if="!path"
     class="sp-flex sp-h-full sp-w-full sp-items-center sp-justify-center"
   >
-    <span class="sp-text-sm sp-text-gray-900">
-      <template v-if="!path">当前未选择文件</template>
-      <template v-else>当前文件不支持编辑</template>
-    </span>
+    <span class="sp-text-sm sp-text-gray-900"> 当前未选择文件 </span>
   </div>
-  <div v-else class="sp-h-full sp-w-full" style="height: calc(100vh - 11rem)">
+  <div v-else-if="isImageFile" class="sp-p-2">
+    <img :src="fullPath" />
+  </div>
+  <div
+    v-else-if="isEditableFile"
+    class="sp-h-full sp-w-full"
+    style="height: calc(100vh - 11rem)"
+  >
     {{ path }}
+  </div>
+  <div
+    v-else
+    class="sp-flex sp-h-full sp-w-full sp-items-center sp-justify-center"
+  >
+    <span class="sp-text-sm sp-text-gray-900"> 当前文件不支持编辑和预览 </span>
   </div>
 </template>

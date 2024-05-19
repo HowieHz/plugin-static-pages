@@ -89,6 +89,7 @@ function handleDeleteFile(file: ProjectFile) {
     description: `确定要删除文件${file.directory ? "夹" : ""}：${
       file.name
     }吗？此操作无法恢复。`,
+    confirmType: "danger",
     async onConfirm() {
       const path = normalizePath(selectedDir.value, file.name);
 
@@ -109,6 +110,7 @@ function handleCleanup() {
   Dialog.warning({
     title: "清空项目文件",
     description: "确定要清空所有的项目文件吗？此操作无法恢复。",
+    confirmType: "danger",
     async onConfirm() {
       await apiClient.delete(
         `/apis/console.api.staticpage.halo.run/v1alpha1/projects/${props.project.metadata.name}/files?path=/`

@@ -4,6 +4,7 @@ import { apiClient } from "@/utils/api-client";
 import {
   Dialog,
   IconDeleteBin,
+  IconExternalLinkLine,
   IconRefreshLine,
   VLoading,
 } from "@halo-dev/components";
@@ -121,6 +122,20 @@ function onContextMenu(
     zIndex: 999,
     items: [
       {
+        label: "访问",
+        icon: h(IconExternalLinkLine),
+        onClick: () => {
+          window.open(
+            normalizePath(
+              "/",
+              props.project.spec.directory,
+              getFileFullPath(stat)
+            ),
+            "_blank"
+          );
+        },
+      },
+      {
         label: "删除",
         icon: h(IconDeleteBin),
         onClick: () => {
@@ -129,6 +144,7 @@ function onContextMenu(
             description: `确定要删除文件${node.directory ? "夹" : ""}：${
               node.name
             }吗？此操作无法恢复。`,
+            confirmType: "danger",
             async onConfirm() {
               const path = normalizePath("/", getFileFullPath(stat));
 
