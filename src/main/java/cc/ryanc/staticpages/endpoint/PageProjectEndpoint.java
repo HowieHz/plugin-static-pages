@@ -108,6 +108,7 @@ public class PageProjectEndpoint implements CustomEndpoint {
                         .name("path")
                     )
                     .response(responseBuilder().implementation(Boolean.class))
+            )
             .GET("/projects/{name}/file-content", this::getFileContent, builder -> builder
                 .operationId("GetFileContent")
                 .tag(tag)
