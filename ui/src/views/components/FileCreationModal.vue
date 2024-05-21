@@ -28,7 +28,7 @@ async function onSubmit({ path }: { path: string }) {
       `/apis/console.api.staticpage.halo.run/v1alpha1/projects/${props.project.metadata.name}/file`,
       {
         path: normalizePath(props.baseDir, path),
-        dir: props.isDir,
+        isDir: props.isDir,
       }
     );
 

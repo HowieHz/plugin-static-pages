@@ -125,6 +125,7 @@ function onContextMenu(
       {
         label: "创建文件夹",
         icon: h(RiFolderAddLine),
+        hidden: !stat.data.directory,
         onClick: () => {
           handleOpenFileCreationModal(true, getFileFullPath(stat));
         },
@@ -132,6 +133,7 @@ function onContextMenu(
       {
         label: "创建文件",
         icon: h(RiFileAddLine),
+        hidden: !stat.data.directory,
         onClick: () => {
           handleOpenFileCreationModal(false, getFileFullPath(stat));
         },
