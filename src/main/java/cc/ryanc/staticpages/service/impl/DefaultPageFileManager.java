@@ -15,6 +15,12 @@ import reactor.core.scheduler.Schedulers;
 @Component
 public class DefaultPageFileManager implements PageFileManager {
 
+    private static void validateRegularFile(Path path) {
+        if (!Files.isRegularFile(path)) {
+            throw new ServerWebInputException("仅支持操作文件类型");
+        }
+    }
+
     @Override
     public Mono<String> readString(Path path) {
         return Mono.fromCallable(() -> {
@@ -26,7 +32,7 @@ public class DefaultPageFileManager implements PageFileManager {
                     return Files.readString(path, StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     log.error("Failed to read file", e);
-                    throw new ServerWebInputException("此文件类型不支持读取");
+                    throw new ServerWebInputException("此文件类型不支持读取", null, e);
                 }
             })
             .subscribeOn(Schedulers.boundedElastic());
@@ -43,7 +49,7 @@ public class DefaultPageFileManager implements PageFileManager {
                     Files.writeString(path, content, StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     log.error("Failed to write file", e);
-                    throw new ServerWebInputException("写入文件失败, 请稍后重试");
+                    throw new ServerWebInputException("写入文件失败, 请稍后重试", null, e);
                 }
             })
             .subscribeOn(Schedulers.boundedElastic())
@@ -67,16 +73,10 @@ public class DefaultPageFileManager implements PageFileManager {
                     }
                 } catch (IOException e) {
                     log.error("Failed to create file", e);
-                    throw new ServerWebInputException("创建文件失败, 请稍后重试", e);
+                    throw new ServerWebInputException("创建文件失败, 请稍后重试", null, e);
                 }
             })
             .subscribeOn(Schedulers.boundedElastic())
             .then();
-    }
-
-    private static void validateRegularFile(Path path) {
-        if (!Files.isRegularFile(path)) {
-            throw new ServerWebInputException("仅支持操作文件类型");
-        }
     }
 }
