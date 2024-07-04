@@ -6,6 +6,7 @@ import static run.halo.app.extension.index.query.QueryFactory.and;
 import static run.halo.app.extension.index.query.QueryFactory.equal;
 import static run.halo.app.extension.index.query.QueryFactory.isNull;
 
+import cc.ryanc.staticpages.service.PageProjectService;
 import cc.ryanc.staticpages.service.ProjectRewriteRules;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
 
     private final ExtensionClient client;
     private final ProjectRewriteRules projectRewriteRules;
+    private final PageProjectService pageProjectService;
 
     @Override
     public Result reconcile(Request request) {
@@ -32,6 +34,7 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
                 if (ExtensionUtil.isDeleted(project)) {
                     if (removeFinalizers(project.getMetadata(), Set.of(FINALIZER))) {
                         projectRewriteRules.removeRules(project);
+                        pageProjectService.deleteProject(project).block();
                         client.update(project);
                         return;
                     }
