@@ -9,6 +9,45 @@
 3. 调用 Halo 的业务 API，自行实现一些页面，比如调用图库插件的 API，单独部署一个图库页面，以解决部分主题没有图库模板的问题。
 4. 利用插件提供的可视化编辑器，在不编写代码的情况下实现一些简单的展示页面。
 
+## ⚠️ 关于缓存的注意事项
+
+由于 Halo 默认为静态资源添加了缓存策略，所以在更新静态资源时可能会出现缓存问题，可以通过以下方式解决：
+
+### 设置 Halo 的静态资源缓存策略（推荐）
+
+将 Halo 的 Cache-Control 设置为 `no-cache`，开启之后会禁止在浏览器缓存资源，但仍然会经过服务器进行验证（协商缓存验证）：
+
+如果你使用的是 Docker 或者 Docker Compose，在启动参数配置中添加 `--spring.web.resources.cache.cachecontrol.no-cache=true` 并重建容器即可，示例：
+
+```yaml
+services:
+  halo:
+    image: registry.fit2cloud.com/halo/halo:2.20
+    ...
+    command:
+      - --spring.web.resources.cache.cachecontrol.no-cache=true
+```
+
+如果你使用的是 Jar 文件部署，在 `application.yaml` 中添加以下配置：
+
+```yaml
+spring:
+  ...
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          no-cache: true
+```
+
+### 手动刷新缓存
+
+缓存可能存在于：
+
+- 浏览器：一般强制刷新浏览器页面即可，或者打开浏览器开发者控制台，勾选禁用缓存并刷新一次。
+- Nginx：如果开启了 Nginx 反向代理缓存，可能需要同时清除 Nginx 缓存。
+- CDN：如果使用了 CDN，可能需要清除 CDN 缓存。
+
 ## 预览
 
 ![项目](./images/plugin-static-pages-projects.png)
