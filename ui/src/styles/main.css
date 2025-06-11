@@ -1,0 +1,9 @@
+.static-pages-card-body {
+  height: 100%;
+  padding: 0 !important;
+}
+
+.static-pages-card-body-overflow-visible {
+  overflow: visible !important;
+  padding: 0 !important;
+}

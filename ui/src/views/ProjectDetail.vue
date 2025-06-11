@@ -69,7 +69,7 @@ const editModalVisible = ref(false);
     <template #icon>
       <VAvatar
         :src="project?.spec.icon"
-        class="mr-2 self-center"
+        class=":uno: mr-2 self-center"
         :alt="project?.spec.title"
         size="xs"
       />
@@ -79,7 +79,7 @@ const editModalVisible = ref(false);
         <VButton size="sm" @click="handleOpen"> 访问</VButton>
         <VButton @click="editModalVisible = true">
           <template #icon>
-            <IconSettings class="size-full" />
+            <IconSettings class=":uno: size-full" />
           </template>
           设置
         </VButton>
@@ -89,17 +89,17 @@ const editModalVisible = ref(false);
 
   <VLoading v-if="isLoading" />
 
-  <div v-else class="m-0 md:m-4">
-    <VCard :body-class="['!p-0', '!overflow-visible']">
+  <div v-else class=":uno: m-0 md:m-4">
+    <VCard :body-class="['static-pages-card-body-overflow-visible']">
       <template #header>
         <VTabbar
           v-model:active-id="activeTab"
           :items="tabs.map((item) => ({ id: item.id, label: item.label }))"
-          class="w-full !rounded-none"
+          class=":uno: w-full !rounded-none"
           type="outline"
         ></VTabbar>
       </template>
-      <div class="rounded-b-base bg-white">
+      <div class=":uno: rounded-b-base bg-white">
         <template v-for="tab in tabs" :key="tab.id">
           <component :is="tab.component" v-if="activeTab === tab.id" :project="project" />
         </template>

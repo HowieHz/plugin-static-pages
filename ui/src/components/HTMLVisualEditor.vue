@@ -79,5 +79,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="gjs" class="size-full"></div>
+  <div id="gjs" class=":uno: size-full"></div>
 </template>

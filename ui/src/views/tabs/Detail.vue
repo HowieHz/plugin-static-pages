@@ -6,7 +6,7 @@ withDefaults(defineProps<{ project: Project }>(), {});
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-b-base">
+  <div class=":uno: overflow-hidden rounded-b-base">
     <VDescription>
       <VDescriptionItem label="ID" :content="project.metadata.name"></VDescriptionItem>
       <VDescriptionItem label="名称" :content="project.spec.title"></VDescriptionItem>

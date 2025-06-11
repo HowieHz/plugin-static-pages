@@ -198,37 +198,37 @@ function handleOpenFileCreationModal(isDir: boolean, baseDir: string) {
     @close="fileCreationModalVisible = false"
   />
 
-  <div class="p-1 flex items-center justify-end gap-2 rounded bg-gray-100">
+  <div class=":uno: p-1 flex items-center justify-end gap-2 rounded bg-gray-100">
     <div
       v-tooltip="'添加文件夹'"
-      class="cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
+      class=":uno: cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
       @click="handleOpenFileCreationModal(true, '/')"
     >
-      <RiFolderAddLine class="text-sm text-gray-600" />
+      <RiFolderAddLine class=":uno: text-sm text-gray-600" />
     </div>
     <div
       v-tooltip="'添加文件'"
-      class="cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
+      class=":uno: cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
       @click="handleOpenFileCreationModal(false, '/')"
     >
-      <RiFileAddLine class="text-sm text-gray-600" />
+      <RiFileAddLine class=":uno: text-sm text-gray-600" />
     </div>
     <div
       v-tooltip="'刷新'"
-      class="cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
+      class=":uno: cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
       @click="refetch()"
     >
       <IconRefreshLine
-        :class="{ 'animate-spin': isFetching || dragging }"
-        class="text-sm text-gray-600"
+        :class="{ ':uno: animate-spin': isFetching || dragging }"
+        class=":uno: text-sm text-gray-600"
       />
     </div>
   </div>
 
   <VLoading v-if="isLoading" />
 
-  <div v-else-if="!rootFiles?.length" class="my-4 flex justify-center">
-    <span class="text-sm text-gray-600">暂无文件</span>
+  <div v-else-if="!rootFiles?.length" class=":uno: my-4 flex justify-center">
+    <span class=":uno: text-sm text-gray-600">暂无文件</span>
   </div>
 
   <Transition v-else appear name="fade">
@@ -237,9 +237,9 @@ function handleOpenFileCreationModal(isDir: boolean, baseDir: string) {
       v-model="rootFiles"
       :each-droppable="onEachDroppable"
       virtualization
-      class="mt-2"
+      class=":uno: mt-2"
       :class="{
-        'pointer-events-none cursor-wait opacity-60': dragging,
+        ':uno: pointer-events-none cursor-wait opacity-60': dragging,
       }"
       :node-key="getNodeKey"
       :default-open="false"
@@ -249,23 +249,23 @@ function handleOpenFileCreationModal(isDir: boolean, baseDir: string) {
     >
       <template #default="{ node, stat }">
         <div
-          class="group flex w-full cursor-pointer items-center justify-between gap-2 rounded p-1 hover:bg-gray-100"
+          class=":uno: group flex w-full cursor-pointer items-center justify-between gap-2 rounded p-1 hover:bg-gray-100"
           :class="{
-            'bg-gray-100': selectedFilePath === normalizePath('/', getFileFullPath(stat)),
+            ':uno: bg-gray-100': selectedFilePath === normalizePath('/', getFileFullPath(stat)),
           }"
           @click="handleClickDocTree(node, stat)"
           @contextmenu="onContextMenu($event, node, stat)"
         >
-          <div class="inline-flex items-center gap-2">
-            <FileIcon :type="node.type" class="size-4" />
-            <span class="line-clamp-1 flex-1 select-none text-sm">
+          <div class=":uno: inline-flex items-center gap-2">
+            <FileIcon :type="node.type" class=":uno: size-4" />
+            <span class=":uno: line-clamp-1 flex-1 select-none text-sm">
               {{ node.name }}
             </span>
           </div>
 
-          <div v-if="node.directory" class="inline-flex gap-2">
-            <RiArrowRightSLine v-if="!stat.open" class="size-4" />
-            <RiArrowDownSLine v-else class="size-4" />
+          <div v-if="node.directory" class=":uno: inline-flex gap-2">
+            <RiArrowRightSLine v-if="!stat.open" class=":uno: size-4" />
+            <RiArrowDownSLine v-else class=":uno: size-4" />
           </div>
         </div>
       </template>

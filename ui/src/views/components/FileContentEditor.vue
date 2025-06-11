@@ -1,14 +1,21 @@
 <script lang="ts" setup>
 import { staticPageConsoleApiClient } from '@/api';
 import type { Project } from '@/api/generated';
-import CodeEditor from '@/components/CodeEditor.vue';
-import HTMLVisualEditor from '@/components/HTMLVisualEditor.vue';
 import { normalizePath } from '@/utils/path';
-import { Toast, VButton, VSpace } from '@halo-dev/components';
+import { Toast, VButton, VLoading, VSpace } from '@halo-dev/components';
 import { useEventListener, useLocalStorage } from '@vueuse/core';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import RiMenuFoldLine from '~icons/ri/menu-fold-line';
 import RiMenuUnfoldLine from '~icons/ri/menu-unfold-line';
+
+const HTMLVisualEditor = defineAsyncComponent({
+  loader: () => import('@/components/HTMLVisualEditor.vue'),
+  loadingComponent: VLoading,
+});
+const CodeEditor = defineAsyncComponent({
+  loader: () => import('@/components/CodeEditor.vue'),
+  loadingComponent: VLoading,
+});
 
 const SUPPORTED_EDIT_FILES = [
   '.md',
@@ -117,17 +124,17 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
 </script>
 
 <template>
-  <div class="flex h-12 items-center justify-between border-b px-2">
+  <div class=":uno: flex h-12 items-center justify-between border-b px-2">
     <VSpace>
       <div
-        class="inline-flex cursor-pointer items-center justify-center rounded p-1.5 transition-all hover:bg-gray-100"
-        :class="{ 'bg-gray-100': !showSidebar }"
+        class=":uno: inline-flex cursor-pointer items-center justify-center rounded p-1.5 transition-all hover:bg-gray-100"
+        :class="{ ':uno: bg-gray-100': !showSidebar }"
         @click="showSidebar = !showSidebar"
       >
         <RiMenuFoldLine v-if="showSidebar" />
         <RiMenuUnfoldLine v-else />
       </div>
-      <span v-if="path" class="text-sm font-semibold text-gray-900">
+      <span v-if="path" class=":uno: text-sm font-semibold text-gray-900">
         {{ path }}
       </span>
     </VSpace>
@@ -138,21 +145,21 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
       <VButton :loading="processing" type="secondary" @click="handleSaveContent"> 保存 </VButton>
     </VSpace>
   </div>
-  <div v-if="!path" class="flex size-full items-center justify-center">
-    <span class="text-sm text-gray-900"> 当前未选择文件 </span>
+  <div v-if="!path" class=":uno: flex size-full items-center justify-center">
+    <span class=":uno: text-sm text-gray-900"> 当前未选择文件 </span>
   </div>
-  <div v-else-if="isImageFile" class="p-2">
+  <div v-else-if="isImageFile" class=":uno: p-2">
     <img :src="fullPath" />
   </div>
   <div
     v-else-if="isEditableFile"
     style="height: calc(100vh - 8.5rem)"
-    class="size-full overflow-auto"
+    class=":uno: size-full overflow-auto"
   >
     <HTMLVisualEditor v-if="enableVisualEditor && path.endsWith('.html')" v-model="content" />
     <CodeEditor v-else v-model="content" :path="path" />
   </div>
-  <div v-else class="flex size-full items-center justify-center">
-    <span class="text-sm text-gray-900"> 当前文件不支持编辑和预览 </span>
+  <div v-else class=":uno: flex size-full items-center justify-center">
+    <span class=":uno: text-sm text-gray-900"> 当前文件不支持编辑和预览 </span>
   </div>
 </template>

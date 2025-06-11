@@ -109,7 +109,7 @@ function handleDelete() {
       @submit="onSubmit"
     />
     <template #footer>
-      <div class="flex justify-between">
+      <div class=":uno: flex justify-between">
         <VSpace>
           <!-- @vue-ignore -->
           <VButton

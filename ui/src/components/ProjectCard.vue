@@ -36,9 +36,9 @@ const errorMessage = computed(() => {
   <ProjectEditModal v-if="editModalVisible" :project="project" @close="editModalVisible = false" />
 
   <div
-    class="cursor-pointer rounded-lg space-y-4 bg-white flex flex-col px-4 py-3 group shadow transition-all hover:ring-1"
+    class=":uno: cursor-pointer rounded-lg space-y-4 bg-white flex flex-col px-4 py-3 group shadow transition-all hover:ring-1"
   >
-    <div class="flex items-center gap-4 flex-none">
+    <div class=":uno: flex items-center gap-4 flex-none">
       <VAvatar :src="project.spec.icon" :alt="project.spec.title" size="xs" />
 
       <RouterLink
@@ -46,7 +46,7 @@ const errorMessage = computed(() => {
           name: 'StaticPageProjectDetail',
           params: { name: project.metadata.name },
         }"
-        class="line-clamp-1 text-base font-semibold hover:text-gray-600 hover:underline"
+        class=":uno: line-clamp-1 text-base font-semibold hover:text-gray-600 hover:underline"
       >
         {{ project.spec.title }}
       </RouterLink>
@@ -55,11 +55,11 @@ const errorMessage = computed(() => {
 
       <VStatusDot v-if="errorMessage" v-tooltip="errorMessage" animate state="warning" />
     </div>
-    <ul class="space-y-2 text-sm text-gray-600 flex-1">
+    <ul class=":uno: space-y-2 text-sm text-gray-600 flex-1">
       <li>{{ project.spec.description }}</li>
-      <li class="line-clamp-1">/{{ project.spec.directory }}</li>
+      <li class=":uno: line-clamp-1">/{{ project.spec.directory }}</li>
     </ul>
-    <div class="flex justify-end flex-none">
+    <div class=":uno: flex justify-end flex-none">
       <VSpace>
         <VButton
           size="sm"

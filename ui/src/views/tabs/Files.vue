@@ -139,23 +139,23 @@ function onUploadModalClose() {
     @close="onUploadModalClose"
   />
 
-  <div class="flex px-4 py-4 justify-between items-center">
+  <div class=":uno: flex px-4 py-4 justify-between items-center">
     <nav aria-label="Breadcrumb">
-      <ol role="list" class="flex items-center space-x-2">
+      <ol role="list" class=":uno: flex items-center space-x-2">
         <li>
           <div>
             <span
-              class="text-gray-400 hover:text-gray-500 cursor-pointer"
+              class=":uno: text-gray-400 hover:text-gray-500 cursor-pointer"
               @click="selectedDir = '/'"
             >
-              <TablerHome class="h-5 w-5 flex-shrink-0" />
+              <TablerHome class=":uno: h-5 w-5 flex-shrink-0" />
             </span>
           </div>
         </li>
         <li v-for="(item, index) in breadcrumbItems" :key="index">
-          <div class="flex items-center">
+          <div class=":uno: flex items-center">
             <svg
-              class="h-5 w-5 flex-shrink-0 text-gray-300"
+              class=":uno: h-5 w-5 flex-shrink-0 text-gray-300"
               fill="currentColor"
               viewBox="0 0 20 20"
               aria-hidden="true"
@@ -163,7 +163,7 @@ function onUploadModalClose() {
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
             </svg>
             <span
-              class="ml-2 cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700"
+              class=":uno: ml-2 cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700"
               @click="selectedDir = item.path"
             >
               {{ item.name }}
@@ -190,81 +190,81 @@ function onUploadModalClose() {
     </VSpace>
   </div>
 
-  <div class="mt-3 flow-root overflow-hidden rounded-b-base">
-    <div class="overflow-x-auto">
-      <div class="inline-block min-w-full align-middle">
-        <table class="min-w-full divide-y divide-gray-300">
+  <div class=":uno: mt-3 flow-root overflow-hidden rounded-b-base">
+    <div class=":uno: overflow-x-auto">
+      <div class=":uno: inline-block min-w-full align-middle">
+        <table class=":uno: min-w-full divide-y divide-gray-300">
           <thead>
             <tr>
-              <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
+              <th scope="col" class=":uno: px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                 文件名
               </th>
-              <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
+              <th scope="col" class=":uno: px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                 类型
               </th>
-              <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
+              <th scope="col" class=":uno: px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                 大小
               </th>
-              <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
+              <th scope="col" class=":uno: px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                 修改时间
               </th>
-              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-3"></th>
+              <th scope="col" class=":uno: relative py-3.5 pl-3 pr-4 sm:pr-3"></th>
             </tr>
           </thead>
-          <tbody class="bg-white">
+          <tbody class=":uno: bg-white">
             <tr
               v-if="selectedDir !== '/'"
-              class="even:bg-gray-50 hover:bg-blue-50 cursor-pointer group select-none"
+              class=":uno: even:bg-gray-50 hover:bg-blue-50 cursor-pointer group select-none"
               @click="handleBack()"
             >
-              <td class="whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-900">
-                <div class="inline-flex items-center gap-2">
-                  <TablerArrowBackUp class="text-gray-600 group-hover:text-blue-600" />
-                  <span class="group-hover:text-blue-600"> .. </span>
+              <td class=":uno: whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-900">
+                <div class=":uno: inline-flex items-center gap-2">
+                  <TablerArrowBackUp class=":uno: text-gray-600 group-hover:text-blue-600" />
+                  <span class=":uno: group-hover:text-blue-600"> .. </span>
                 </div>
               </td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">--</td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">--</td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500 cursor-pointer">--</td>
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500">--</td>
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500">--</td>
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500 cursor-pointer">--</td>
               <td
-                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3"
+                class=":uno: relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3"
               ></td>
             </tr>
             <tr
               v-for="file in data"
               :key="file.path"
-              class="even:bg-gray-50 hover:bg-blue-50 cursor-pointer group"
+              class=":uno: even:bg-gray-50 hover:bg-blue-50 cursor-pointer group"
               @click="handleClickRow(file)"
             >
-              <td class="whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-900">
-                <div class="inline-flex items-center gap-2">
+              <td class=":uno: whitespace-nowrap py-4 px-4 text-sm font-medium text-gray-900">
+                <div class=":uno: inline-flex items-center gap-2">
                   <FileIcon :type="file.type!" />
-                  <span class="group-hover:text-blue-600">
+                  <span class=":uno: group-hover:text-blue-600">
                     {{ file.name }}
                   </span>
                   <TablerExternalLink
                     v-if="!file.directory"
-                    class="invisible group-hover:visible text-gray-600 hover:text-gray-900"
+                    class=":uno: invisible group-hover:visible text-gray-600 hover:text-gray-900"
                     @click.stop="handleOpenFile(file)"
                   />
                 </div>
               </td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500">
                 {{ file.type }}
               </td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500">
                 {{ prettyBytes(file.size || 0) }}
               </td>
-              <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500 cursor-pointer">
+              <td class=":uno: whitespace-nowrap px-4 py-4 text-sm text-gray-500 cursor-pointer">
                 <span v-tooltip="formatDatetime(file.lastModifiedTime)">
                   {{ relativeTimeTo(file.lastModifiedTime) }}
                 </span>
               </td>
               <td
-                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3"
+                class=":uno: relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-3"
               >
                 <span
-                  class="text-red-500 hover:text-red-400 group-hover:visible invisible"
+                  class=":uno: text-red-500 hover:text-red-400 group-hover:visible invisible"
                   @click.stop="handleDeleteFile(file)"
                 >
                   删除

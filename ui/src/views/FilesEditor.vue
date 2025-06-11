@@ -31,7 +31,7 @@ const selectedFilePath = useRouteQuery<string | undefined>('path');
     <template #icon>
       <VAvatar
         :src="project?.spec.icon"
-        class="mr-2 self-center"
+        class=":uno: mr-2 self-center"
         :alt="project?.spec.title"
         size="xs"
       />
@@ -43,22 +43,22 @@ const selectedFilePath = useRouteQuery<string | undefined>('path');
     </template>
   </VPageHeader>
 
-  <div class="m-0 rounded bg-white md:m-4">
-    <VCard style="height: calc(100vh - 5.5rem)" :body-class="['h-full', '!p-0']">
+  <div class=":uno: m-0 rounded bg-white md:m-4">
+    <VCard style="height: calc(100vh - 5.5rem)" :body-class="['static-pages-card-body']">
       <div
-        class="grid h-full grid-cols-12 divide-y sm:divide-x sm:divide-y-0"
-        :class="{ '!divide-none': !showSidebar }"
+        class=":uno: grid h-full grid-cols-12 divide-y sm:divide-x sm:divide-y-0"
+        :class="{ ':uno: !divide-none': !showSidebar }"
       >
         <div
           v-show="showSidebar"
-          class="relative col-span-12 h-full overflow-auto p-2 sm:col-span-6 lg:col-span-5 xl:col-span-3"
+          class=":uno: relative col-span-12 h-full overflow-auto p-2 sm:col-span-6 lg:col-span-5 xl:col-span-3"
         >
           <FilesTreeSection v-if="project" v-model="selectedFilePath" :project="project" />
         </div>
 
         <div
-          class="col-span-12 sm:col-span-6 lg:col-span-7 xl:col-span-9"
-          :class="{ '!col-span-12': !showSidebar }"
+          class=":uno: col-span-12 sm:col-span-6 lg:col-span-7 xl:col-span-9"
+          :class="{ ':uno: !col-span-12': !showSidebar }"
         >
           <FileContentEditor v-if="project" :project="project" :path="selectedFilePath" />
         </div>
