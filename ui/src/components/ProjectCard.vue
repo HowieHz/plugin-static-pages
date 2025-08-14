@@ -36,9 +36,9 @@ const errorMessage = computed(() => {
   <ProjectEditModal v-if="editModalVisible" :project="project" @close="editModalVisible = false" />
 
   <div
-    class=":uno: cursor-pointer rounded-lg space-y-4 bg-white flex flex-col px-4 py-3 group shadow transition-all hover:ring-1"
+    class=":uno: group flex flex-col cursor-pointer rounded-lg bg-white px-4 py-3 shadow transition-all space-y-4 hover:ring-1"
   >
-    <div class=":uno: flex items-center gap-4 flex-none">
+    <div class=":uno: flex flex-none items-center gap-4">
       <VAvatar :src="project.spec.icon" :alt="project.spec.title" size="xs" />
 
       <RouterLink
@@ -55,11 +55,11 @@ const errorMessage = computed(() => {
 
       <VStatusDot v-if="errorMessage" v-tooltip="errorMessage" animate state="warning" />
     </div>
-    <ul class=":uno: space-y-2 text-sm text-gray-600 flex-1">
+    <ul class=":uno: flex-1 text-sm text-gray-600 space-y-2">
       <li>{{ project.spec.description }}</li>
       <li class=":uno: line-clamp-1">/{{ project.spec.directory }}</li>
     </ul>
-    <div class=":uno: flex justify-end flex-none">
+    <div class=":uno: flex flex-none justify-end">
       <VSpace>
         <VButton
           size="sm"

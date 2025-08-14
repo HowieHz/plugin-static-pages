@@ -1,9 +1,9 @@
+import { VLoading } from '@halo-dev/components';
 import { definePlugin } from '@halo-dev/console-shared';
+import 'uno.css';
 import { defineAsyncComponent, markRaw } from 'vue';
 import CarbonWebServicesContainer from '~icons/carbon/web-services-container';
-import { VLoading } from '@halo-dev/components';
 import './styles/main.css';
-import 'uno.css';
 
 export default definePlugin({
   components: {},

@@ -36,7 +36,7 @@ const creationModalVisible = ref(false);
     <VLoading v-if="isLoading" />
     <Transition v-else appear name="fade">
       <div
-        class=":uno: grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+        class=":uno: grid grid-cols-1 gap-3 2xl:grid-cols-5 lg:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4"
       >
         <ProjectCard
           v-for="project in data?.items"
@@ -45,7 +45,7 @@ const creationModalVisible = ref(false);
         />
 
         <div
-          class=":uno: group flex min-h-[10rem] cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg border border-dashed bg-white px-4 py-3 shadow transition-all hover:border-solid hover:border-indigo-300"
+          class=":uno: group min-h-[10rem] flex flex-col cursor-pointer items-center justify-center border rounded-lg border-dashed bg-white px-4 py-3 shadow transition-all space-y-2 hover:border-indigo-300 hover:border-solid"
           @click="creationModalVisible = true"
         >
           <div

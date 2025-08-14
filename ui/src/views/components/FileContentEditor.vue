@@ -124,7 +124,7 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
 </script>
 
 <template>
-  <div class=":uno: flex h-12 items-center justify-between border-b px-2">
+  <div class=":uno: h-12 flex items-center justify-between border-b px-2">
     <VSpace>
       <div
         class=":uno: inline-flex cursor-pointer items-center justify-center rounded p-1.5 transition-all hover:bg-gray-100"
@@ -134,7 +134,7 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
         <RiMenuFoldLine v-if="showSidebar" />
         <RiMenuUnfoldLine v-else />
       </div>
-      <span v-if="path" class=":uno: text-sm font-semibold text-gray-900">
+      <span v-if="path" class=":uno: text-sm text-gray-900 font-semibold">
         {{ path }}
       </span>
     </VSpace>
@@ -145,7 +145,7 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
       <VButton :loading="processing" type="secondary" @click="handleSaveContent"> 保存 </VButton>
     </VSpace>
   </div>
-  <div v-if="!path" class=":uno: flex size-full items-center justify-center">
+  <div v-if="!path" class=":uno: size-full flex items-center justify-center">
     <span class=":uno: text-sm text-gray-900"> 当前未选择文件 </span>
   </div>
   <div v-else-if="isImageFile" class=":uno: p-2">
@@ -159,7 +159,7 @@ const enableVisualEditor = useLocalStorage('plugin-static-pages:enable-visual-ed
     <HTMLVisualEditor v-if="enableVisualEditor && path.endsWith('.html')" v-model="content" />
     <CodeEditor v-else v-model="content" :path="path" />
   </div>
-  <div v-else class=":uno: flex size-full items-center justify-center">
+  <div v-else class=":uno: size-full flex items-center justify-center">
     <span class=":uno: text-sm text-gray-900"> 当前文件不支持编辑和预览 </span>
   </div>
 </template>

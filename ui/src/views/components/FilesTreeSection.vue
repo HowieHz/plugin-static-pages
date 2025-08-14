@@ -198,7 +198,7 @@ function handleOpenFileCreationModal(isDir: boolean, baseDir: string) {
     @close="fileCreationModalVisible = false"
   />
 
-  <div class=":uno: p-1 flex items-center justify-end gap-2 rounded bg-gray-100">
+  <div class=":uno: flex items-center justify-end gap-2 rounded bg-gray-100 p-1">
     <div
       v-tooltip="'添加文件夹'"
       class=":uno: cursor-pointer rounded-full p-1.5 transition-all hover:bg-gray-200"
@@ -249,7 +249,7 @@ function handleOpenFileCreationModal(isDir: boolean, baseDir: string) {
     >
       <template #default="{ node, stat }">
         <div
-          class=":uno: group flex w-full cursor-pointer items-center justify-between gap-2 rounded p-1 hover:bg-gray-100"
+          class=":uno: group w-full flex cursor-pointer items-center justify-between gap-2 rounded p-1 hover:bg-gray-100"
           :class="{
             ':uno: bg-gray-100': selectedFilePath === normalizePath('/', getFileFullPath(stat)),
           }"

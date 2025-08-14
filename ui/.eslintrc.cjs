@@ -8,6 +8,7 @@ module.exports = {
     'eslint:recommended',
     '@vue/eslint-config-typescript/recommended',
     '@vue/eslint-config-prettier',
+    '@unocss',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
@@ -18,5 +19,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
     'vue/no-v-html': 'off',
+    '@unocss/enforce-class-compile': 1,
   },
 };
