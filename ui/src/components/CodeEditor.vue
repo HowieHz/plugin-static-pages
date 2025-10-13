@@ -1,39 +1,77 @@
 <script lang="ts" setup>
-import { css } from '@codemirror/lang-css';
-import { html } from '@codemirror/lang-html';
-import { javascript } from '@codemirror/lang-javascript';
-import type { LanguageSupport } from '@codemirror/language';
-import { EditorView } from '@codemirror/view';
-import { computed } from 'vue';
-import { Codemirror } from 'vue-codemirror';
+import * as monaco from 'monaco-editor';
+import { computed, onUnmounted, ref, shallowRef, watch, watchEffect } from 'vue';
+
+const SUPPORTED_LANGUAGES: Record<string, string> = {
+  md: 'markdown',
+  html: 'html',
+  htm: 'html',
+  css: 'css',
+  js: 'javascript',
+  json: 'json',
+  xml: 'xml',
+};
 
 const props = withDefaults(defineProps<{ path: string }>(), {});
-
 const modelValue = defineModel({ type: String, default: '' });
 
-const languages: Record<string, LanguageSupport> = {
-  html: html(),
-  js: javascript(),
-  css: css(),
-};
+const editorRef = ref<HTMLElement | null>(null);
+const editor = shallowRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
 const currentLanguage = computed(() => {
   const ext = props.path.split('.').pop();
   if (!ext) {
-    return languages.html;
+    return 'plaintext';
   }
-  return languages[ext] ?? languages.html;
+  return SUPPORTED_LANGUAGES[ext] ?? 'plaintext';
+});
+
+watchEffect(() => {
+  if (editorRef.value && !editor.value) {
+    editor.value = monaco.editor.create(editorRef.value, {
+      value: modelValue.value,
+      automaticLayout: true,
+      language: currentLanguage.value,
+      mouseWheelZoom: true,
+    });
+    editor.value.setValue(modelValue.value);
+    editor.value.onDidChangeModelContent(() => {
+      const value = editor.value?.getValue() || '';
+      if (value !== modelValue.value) {
+        modelValue.value = value;
+      }
+    });
+  }
+});
+
+watch(
+  () => currentLanguage.value,
+  (newLang) => {
+    if (editor.value) {
+      monaco.editor.setModelLanguage(editor.value.getModel()!, newLang);
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => modelValue.value,
+  (newVal) => {
+    if (editor.value && editor.value.getValue() !== newVal) {
+      editor.value.setValue(newVal);
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+
+onUnmounted(() => {
+  editor.value?.dispose();
+  editor.value = null;
 });
 </script>
 
 <template>
-  <codemirror
-    v-model="modelValue"
-    placeholder="..."
-    :style="{ height: '100%', overflow: 'auto' }"
-    :autofocus="true"
-    :indent-with-tab="false"
-    :tab-size="2"
-    :extensions="[currentLanguage, EditorView.lineWrapping]"
-  />
+  <div ref="editorRef" style="height: 100%"></div>
 </template>
