@@ -56,7 +56,7 @@ const { mutate, isLoading } = useMutation({
         {
           op: 'add',
           path: '/spec/maxVersions',
-          value: data.maxVersions ?? 10,
+          value: data.maxVersions ?? 5,
         },
       ],
     });

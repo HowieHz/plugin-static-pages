@@ -57,9 +57,9 @@ function onSubmit(data: ProjectFormState) {
     <FormKit
       type="number"
       name="maxVersions"
-      :model-value="formState?.maxVersions ?? 10"
+      :model-value="formState?.maxVersions ?? 5"
       label="最大版本数"
-      help="保留的最大版本数量，0 表示无限制，默认为 10"
+      help="保留的最大版本数量，0 表示无限制，默认为 5"
       validation="required|min:0"
       :validation-messages="{
         min: '最小值为 0',
