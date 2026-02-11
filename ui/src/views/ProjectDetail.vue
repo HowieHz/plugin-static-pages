@@ -18,6 +18,7 @@ import { markRaw, ref, type Component, type Raw } from 'vue';
 import { useRoute } from 'vue-router';
 import Detail from './tabs/Detail.vue';
 import Files from './tabs/Files.vue';
+import Versions from './tabs/Versions.vue';
 
 interface Tab {
   id: string;
@@ -47,6 +48,11 @@ const tabs: Tab[] = [
     id: 'files',
     label: '文件管理',
     component: markRaw(Files),
+  },
+  {
+    id: 'versions',
+    label: '版本管理',
+    component: markRaw(Versions),
   },
 ];
 
