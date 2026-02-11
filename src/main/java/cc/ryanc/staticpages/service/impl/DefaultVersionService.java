@@ -2,6 +2,7 @@ package cc.ryanc.staticpages.service.impl;
 
 import cc.ryanc.staticpages.extensions.Project;
 import cc.ryanc.staticpages.extensions.ProjectVersion;
+import cc.ryanc.staticpages.service.ProjectLockManager;
 import cc.ryanc.staticpages.service.VersionService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,30 +31,34 @@ public class DefaultVersionService implements VersionService {
     
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
+    private final ProjectLockManager lockManager;
     
     @Override
     public Mono<ProjectVersion> createVersion(String projectName, String description) {
-        return getNextVersionNumber(projectName)
-            .flatMap(versionNumber -> {
-                var version = new ProjectVersion();
-                version.setMetadata(new Metadata());
-                version.getMetadata().setGenerateName(projectName + "-version-");
-                
-                var spec = new ProjectVersion.Spec();
-                spec.setProjectName(projectName);
-                spec.setVersion(versionNumber);
-                spec.setDisplayName("v" + versionNumber);
-                spec.setDirectory(VERSIONS_DIR + "/" + VERSION_DIR_PREFIX + versionNumber);
-                spec.setActive(false);
-                spec.setCreationTime(Instant.now());
-                spec.setDescription(description);
-                spec.setSize(0L);
-                
-                version.setSpec(spec);
-                
-                return client.create(version);
-            })
-            .flatMap(version -> cleanupOldVersions(projectName).thenReturn(version));
+        // Wrap version creation in lock to prevent concurrent version number conflicts
+        return lockManager.withLock(projectName, 
+            getNextVersionNumber(projectName)
+                .flatMap(versionNumber -> {
+                    var version = new ProjectVersion();
+                    version.setMetadata(new Metadata());
+                    version.getMetadata().setGenerateName(projectName + "-version-");
+                    
+                    var spec = new ProjectVersion.Spec();
+                    spec.setProjectName(projectName);
+                    spec.setVersion(versionNumber);
+                    spec.setDisplayName("v" + versionNumber);
+                    spec.setDirectory(VERSIONS_DIR + "/" + VERSION_DIR_PREFIX + versionNumber);
+                    spec.setActive(false);
+                    spec.setCreationTime(Instant.now());
+                    spec.setDescription(description);
+                    spec.setSize(0L);
+                    
+                    version.setSpec(spec);
+                    
+                    return client.create(version);
+                })
+                .flatMap(version -> cleanupOldVersions(projectName).thenReturn(version))
+        );
     }
     
     @Override
@@ -68,20 +73,23 @@ public class DefaultVersionService implements VersionService {
         return client.get(ProjectVersion.class, versionName)
             .flatMap(version -> {
                 var projectName = version.getSpec().getProjectName();
-                // Deactivate all other versions
-                return listVersions(projectName)
-                    .filter(v -> !versionName.equals(v.getMetadata().getName()))
-                    .filter(v -> Boolean.TRUE.equals(v.getSpec().getActive()))
-                    .flatMap(v -> {
-                        v.getSpec().setActive(false);
-                        return client.update(v);
-                    })
-                    .then(Mono.defer(() -> {
-                        // Activate this version
-                        version.getSpec().setActive(true);
-                        return client.update(version)
-                            .flatMap(v -> copyVersionToRoot(projectName, v).thenReturn(v));
-                    }));
+                // Wrap activation in lock to prevent concurrent file operations
+                return lockManager.withLock(projectName,
+                    // Deactivate all other versions
+                    listVersions(projectName)
+                        .filter(v -> !versionName.equals(v.getMetadata().getName()))
+                        .filter(v -> Boolean.TRUE.equals(v.getSpec().getActive()))
+                        .flatMap(v -> {
+                            v.getSpec().setActive(false);
+                            return client.update(v);
+                        })
+                        .then(Mono.defer(() -> {
+                            // Activate this version
+                            version.getSpec().setActive(true);
+                            return client.update(version)
+                                .flatMap(v -> copyVersionToRoot(projectName, v).thenReturn(v));
+                        }))
+                );
             });
     }
     
