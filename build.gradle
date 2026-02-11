@@ -41,9 +41,8 @@ test {
 node {
     // Explicitly set Node.js and pnpm versions for reproducible builds
     // pnpm version must match packageManager in ui/package.json
-    version = '20.11.0'
+    version = '24'
     pnpmVersion = '10.22.0'
-    download = true
     nodeProjectDir = file("${project.projectDir}/ui")
 }
 
@@ -58,11 +57,8 @@ tasks.register('installDepsForUI', PnpmTask) {
 
 build {
     // build frontend before build
-    // Can be disabled with -PskipFrontend=true for backend-only development
-    if (!project.hasProperty('skipFrontend') || !project.property('skipFrontend').toBoolean()) {
-        tasks.named('compileJava').configure {
-            dependsOn('buildFrontend')
-        }
+    tasks.named('compileJava').configure {
+        dependsOn('buildFrontend')
     }
 }
 
