@@ -3,7 +3,7 @@ import { staticPageConsoleApiClient } from '@/api';
 import type { ProjectVersion } from '@/api/generated';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
-import { VButton, VLoading, VEmpty, VSpace, VTag, Dialog } from '@halo-dev/components';
+import { VButton, VLoading, VEmpty, VSpace, VTag, Dialog, Toast } from '@halo-dev/components';
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -29,11 +29,11 @@ const activateVersionMutation = useMutation({
     });
   },
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['plugin-static-pages:versions'] });
-    Dialog.success('版本已激活');
+    queryClient.invalidateQueries({ queryKey: ['plugin-static-pages:versions', projectName] });
+    Toast.success('版本已激活');
   },
   onError: (error: any) => {
-    Dialog.error('激活失败', error.message || '未知错误');
+    Toast.error(error.message || '激活失败');
   },
 });
 
@@ -46,11 +46,11 @@ const deleteVersionMutation = useMutation({
     });
   },
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['plugin-static-pages:versions'] });
-    Dialog.success('版本已删除');
+    queryClient.invalidateQueries({ queryKey: ['plugin-static-pages:versions', projectName] });
+    Toast.success('版本已删除');
   },
   onError: (error: any) => {
-    Dialog.error('删除失败', error.message || '未知错误');
+    Toast.error(error.message || '删除失败');
   },
 });
 
