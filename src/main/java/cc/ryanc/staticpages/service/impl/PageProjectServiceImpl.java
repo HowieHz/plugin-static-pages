@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -36,7 +38,9 @@ import run.halo.app.infra.BackupRootGetter;
 @Component
 @RequiredArgsConstructor
 public class PageProjectServiceImpl implements PageProjectService {
-    private static final String VERSION_UPLOAD_DESCRIPTION = "Upload at ";
+    private static final DateTimeFormatter DATE_FORMATTER = 
+        DateTimeFormatter.ofPattern("yyyy/M/d HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
     
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
@@ -113,9 +117,11 @@ public class PageProjectServiceImpl implements PageProjectService {
     @Override
     public Mono<Path> upload(UploadContext uploadContext) {
         var projectName = uploadContext.getName();
+        var now = Instant.now();
+        var formattedTime = DATE_FORMATTER.format(now);
+        var description = "上传于 " + formattedTime;
         
-        return versionService.createVersion(projectName, 
-                VERSION_UPLOAD_DESCRIPTION + Instant.now())
+        return versionService.createVersion(projectName, description)
             .flatMap(version -> {
                 // Upload to the new version directory
                 return client.get(Project.class, projectName)
@@ -135,16 +141,9 @@ public class PageProjectServiceImpl implements PageProjectService {
                         
                         return writeToFile(basePath, uploadContext)
                             .flatMap(path -> {
-                                // If this is the first version, activate it automatically
-                                return versionService.listVersions(projectName)
-                                    .collectList()
-                                    .flatMap(versions -> {
-                                        if (versions.size() == 1) {
-                                            return versionService.activateVersion(
-                                                version.getMetadata().getName());
-                                        }
-                                        return Mono.just(version);
-                                    })
+                                // Always activate the new version automatically
+                                return versionService.activateVersion(
+                                    version.getMetadata().getName())
                                     .thenReturn(path);
                             });
                     });
