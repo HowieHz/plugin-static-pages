@@ -44,7 +44,7 @@ class DefaultVersionServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(backupRootGetter.get()).thenReturn(tempDir.resolve("backup"));
-        lockManager = new ProjectLockManager();
+        lockManager = new ProjectLockManager(3600000); // 1 hour
         versionService = new DefaultVersionService(client, backupRootGetter, lockManager);
     }
     

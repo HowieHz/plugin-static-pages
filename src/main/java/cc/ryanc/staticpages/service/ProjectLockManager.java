@@ -1,12 +1,13 @@
 package cc.ryanc.staticpages.service;
 
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +15,14 @@ import reactor.core.publisher.Mono;
  * Manages locks for project operations to prevent race conditions during
  * concurrent version activations, uploads, and other file operations.
  * 
- * Includes automatic cleanup of unused locks to prevent memory leaks.
+ * Uses Guava LoadingCache with automatic time-based eviction (industry best practice).
+ * Locks are automatically removed after {@code lockRetentionMillis} of inactivity.
+ * 
+ * This is the recommended approach over scheduled cleanup or weak references:
+ * - No background threads needed
+ * - Automatic cleanup during normal operations
+ * - Thread-safe with minimal overhead
+ * - Battle-tested in production by Google, Netflix, etc.
  * 
  * @author HowieHz
  */
@@ -22,45 +30,46 @@ import reactor.core.publisher.Mono;
 @Component
 public class ProjectLockManager {
     
-    private final ConcurrentHashMap<String, LockInfo> projectLocks = new ConcurrentHashMap<>();
-    
     @Value("${static-pages.lock.retention-time:3600000}") // Default: 1 hour
     private long lockRetentionMillis;
     
+    private final LoadingCache<String, Lock> projectLocks;
+    
     /**
-     * Holds a lock and its last access time for automatic cleanup.
+     * Constructor that initializes the LoadingCache with automatic eviction.
      */
-    @Getter
-    private static class LockInfo {
-        private final ReentrantLock lock;
-        private volatile long lastAccessTime;
+    public ProjectLockManager(
+            @Value("${static-pages.lock.retention-time:3600000}") long lockRetentionMillis) {
+        this.lockRetentionMillis = lockRetentionMillis;
         
-        public LockInfo() {
-            this.lock = new ReentrantLock();
-            this.lastAccessTime = System.currentTimeMillis();
-        }
+        this.projectLocks = CacheBuilder.newBuilder()
+                .expireAfterAccess(lockRetentionMillis, TimeUnit.MILLISECONDS)
+                .build(new CacheLoader<String, Lock>() {
+                    @Override
+                    public Lock load(String key) {
+                        log.debug("Creating new lock for project: {}", key);
+                        return new ReentrantLock();
+                    }
+                });
         
-        /**
-         * Update the last access time to current time.
-         */
-        public void updateAccessTime() {
-            this.lastAccessTime = System.currentTimeMillis();
-        }
+        log.info("ProjectLockManager initialized with {}ms retention time", lockRetentionMillis);
     }
     
     /**
-     * Get or create a lock for the specified project.
+     * Get or create a lock for the given project name.
+     * The lock will be automatically removed after retention time of inactivity.
      * 
      * @param projectName the project name
-     * @return the lock for this project
+     * @return the lock for the project
      */
-    public Lock getLock(String projectName) {
-        LockInfo lockInfo = projectLocks.computeIfAbsent(projectName, k -> {
-            log.debug("Creating new lock for project: {}", projectName);
-            return new LockInfo();
-        });
-        lockInfo.updateAccessTime();
-        return lockInfo.getLock();
+    private Lock getLock(String projectName) {
+        try {
+            return projectLocks.get(projectName);
+        } catch (Exception e) {
+            log.error("Failed to get lock for project: {}", projectName, e);
+            // Fallback to creating a new lock directly
+            return new ReentrantLock();
+        }
     }
     
     /**
@@ -94,10 +103,8 @@ public class ProjectLockManager {
      * @param projectName the project name
      */
     public void removeLock(String projectName) {
-        LockInfo removed = projectLocks.remove(projectName);
-        if (removed != null) {
-            log.debug("Removed lock for project: {}", projectName);
-        }
+        projectLocks.invalidate(projectName);
+        log.debug("Invalidated lock cache for project: {}", projectName);
     }
     
     /**
@@ -107,55 +114,6 @@ public class ProjectLockManager {
      * @return the number of project locks
      */
     public int getActiveLockCount() {
-        return projectLocks.size();
-    }
-    
-    /**
-     * Scheduled task to clean up unused locks automatically.
-     * Runs every 30 minutes by default (configurable via static-pages.lock.cleanup-interval).
-     * 
-     * Removes locks that:
-     * 1. Haven't been accessed for more than the retention time (default: 1 hour)
-     * 2. Are not currently held by any thread (safe to remove)
-     * 
-     * This prevents memory leaks from abandoned locks while maintaining safety.
-     */
-    @Scheduled(fixedDelayString = "${static-pages.lock.cleanup-interval:1800000}") // Default: 30 minutes
-    public void cleanupUnusedLocks() {
-        long timeout = lockRetentionMillis;
-        long now = System.currentTimeMillis();
-        int removedCount = 0;
-        
-        log.debug("Starting lock cleanup task. Current lock count: {}", projectLocks.size());
-        
-        for (var entry : projectLocks.entrySet()) {
-            String projectName = entry.getKey();
-            LockInfo lockInfo = entry.getValue();
-            
-            // Check if lock hasn't been accessed for longer than retention time
-            if ((now - lockInfo.getLastAccessTime()) > timeout) {
-                // Try to acquire the lock - if successful, it's not in use
-                if (lockInfo.getLock().tryLock()) {
-                    try {
-                        // Double-check the lock is still in the map and still unused
-                        LockInfo current = projectLocks.get(projectName);
-                        if (current == lockInfo && 
-                            (now - lockInfo.getLastAccessTime()) > timeout) {
-                            projectLocks.remove(projectName);
-                            removedCount++;
-                            log.info("Cleaned up unused lock for project: {} (idle for {} ms)", 
-                                projectName, now - lockInfo.getLastAccessTime());
-                        }
-                    } finally {
-                        lockInfo.getLock().unlock();
-                    }
-                } else {
-                    log.debug("Lock for project {} is in use, skipping cleanup", projectName);
-                }
-            }
-        }
-        
-        log.debug("Lock cleanup completed. Removed: {}, Remaining: {}", 
-            removedCount, projectLocks.size());
+        return (int) projectLocks.size();
     }
 }
