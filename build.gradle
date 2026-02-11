@@ -53,10 +53,12 @@ tasks.register('installDepsForUI', PnpmTask) {
 
 build {
     // build frontend before build
-    // Temporarily disabled for backend-only development
-    // tasks.named('compileJava').configure {
-    //     dependsOn('buildFrontend')
-    // }
+    // Can be disabled with -PskipFrontend=true for backend-only development
+    if (!project.hasProperty('skipFrontend') || !project.property('skipFrontend').toBoolean()) {
+        tasks.named('compileJava').configure {
+            dependsOn('buildFrontend')
+        }
+    }
 }
 
 halo {

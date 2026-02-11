@@ -25,6 +25,9 @@ import run.halo.app.infra.BackupRootGetter;
 @Component
 @RequiredArgsConstructor
 public class DefaultVersionService implements VersionService {
+    private static final String VERSIONS_DIR = "versions";
+    private static final String VERSION_DIR_PREFIX = "version-";
+    
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
     
@@ -40,7 +43,7 @@ public class DefaultVersionService implements VersionService {
                 spec.setProjectName(projectName);
                 spec.setVersion(versionNumber);
                 spec.setDisplayName("v" + versionNumber);
-                spec.setDirectory("versions/version-" + versionNumber);
+                spec.setDirectory(VERSIONS_DIR + "/" + VERSION_DIR_PREFIX + versionNumber);
                 spec.setActive(false);
                 spec.setCreationTime(Instant.now());
                 spec.setDescription(description);
@@ -177,7 +180,7 @@ public class DefaultVersionService implements VersionService {
                     // Clear project root (except .versions directory)
                     if (Files.exists(projectPath) && Files.isDirectory(projectPath)) {
                         Files.list(projectPath)
-                            .filter(path -> !path.getFileName().toString().equals("versions"))
+                            .filter(path -> !path.getFileName().toString().equals(VERSIONS_DIR))
                             .forEach(path -> {
                                 try {
                                     FileSystemUtils.deleteRecursively(path);

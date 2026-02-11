@@ -36,6 +36,8 @@ import run.halo.app.infra.BackupRootGetter;
 @Component
 @RequiredArgsConstructor
 public class PageProjectServiceImpl implements PageProjectService {
+    private static final String VERSION_UPLOAD_DESCRIPTION = "Upload at ";
+    
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
     private final PageFileManager pageFileManager;
@@ -112,7 +114,8 @@ public class PageProjectServiceImpl implements PageProjectService {
     public Mono<Path> upload(UploadContext uploadContext) {
         var projectName = uploadContext.getName();
         
-        return versionService.createVersion(projectName, "Upload at " + Instant.now())
+        return versionService.createVersion(projectName, 
+                VERSION_UPLOAD_DESCRIPTION + Instant.now())
             .flatMap(version -> {
                 // Upload to the new version directory
                 return client.get(Project.class, projectName)
