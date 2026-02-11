@@ -13,13 +13,13 @@ spec:
   requires: ">=2.22.0"
   author:
     name: Ryan Wang & guqing
-    # website: https://github.com/ruibaby
+    website: https://github.com/ruibaby
   logo: logo.svg
   homepage: https://www.halo.run/store/apps/app-gFkMn
-  # repo: https://github.com/ruibaby/plugin-static-pages
-  issues: https://www.halo.run/store/apps/app-gFkMn?tab=comment
+  repo: https://github.com/ruibaby/plugin-static-pages
+  issues: https://github.com/ruibaby/plugin-static-pages/issues
   displayName: "静态网页服务"
   description: "提供静态网页部署服务，可以将静态网页上传到 Halo，然后提供访问路由"
-  # license:
-  #   - name: "GPL-3.0"
-  #     url: "https://github.com/ruibaby/plugin-static-pages/blob/main/LICENSE"
+  license:
+    - name: "GPL-3.0"
+      url: "https://github.com/ruibaby/plugin-static-pages/blob/main/LICENSE"
