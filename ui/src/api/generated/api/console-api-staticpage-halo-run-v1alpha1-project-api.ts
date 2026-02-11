@@ -26,6 +26,8 @@ import type { CreateFileRequest } from '../models';
 // @ts-ignore
 import type { ProjectFile } from '../models';
 // @ts-ignore
+import type { ProjectVersion } from '../models';
+// @ts-ignore
 import type { UploadRequestFormData } from '../models';
 // @ts-ignore
 import type { WriteContentRequest } from '../models';
@@ -335,6 +337,134 @@ export const ConsoleApiStaticpageHaloRunV1alpha1ProjectApiAxiosParamCreator = fu
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * List all versions for a project
+         * @param {string} name Project name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProjectVersions: async (name: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('listProjectVersions', 'name', name)
+            const localVarPath = `/apis/console.api.staticpage.halo.run/v1alpha1/projects/{name}/versions`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication basicAuth required
+            // http basic authentication required
+            setBasicAuthToObject(localVarRequestOptions, configuration)
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Activate a specific version
+         * @param {string} name Project name
+         * @param {string} versionName Version name to activate
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        activateProjectVersion: async (name: string, versionName: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('activateProjectVersion', 'name', name)
+            // verify required parameter 'versionName' is not null or undefined
+            assertParamExists('activateProjectVersion', 'versionName', versionName)
+            const localVarPath = `/apis/console.api.staticpage.halo.run/v1alpha1/projects/{name}/versions/{versionName}/activate`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)))
+                .replace(`{${"versionName"}}`, encodeURIComponent(String(versionName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication basicAuth required
+            // http basic authentication required
+            setBasicAuthToObject(localVarRequestOptions, configuration)
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a specific version
+         * @param {string} name Project name
+         * @param {string} versionName Version name to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteProjectVersion: async (name: string, versionName: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteProjectVersion', 'name', name)
+            // verify required parameter 'versionName' is not null or undefined
+            assertParamExists('deleteProjectVersion', 'versionName', versionName)
+            const localVarPath = `/apis/console.api.staticpage.halo.run/v1alpha1/projects/{name}/versions/{versionName}`
+                .replace(`{${"name"}}`, encodeURIComponent(String(name)))
+                .replace(`{${"versionName"}}`, encodeURIComponent(String(versionName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication basicAuth required
+            // http basic authentication required
+            setBasicAuthToObject(localVarRequestOptions, configuration)
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -427,6 +557,44 @@ export const ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFp = function(configur
             const localVarOperationServerBasePath = operationServerMap['ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.writeContentToFile']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * List all versions for a project
+         * @param {string} name Project name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listProjectVersions(name: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ProjectVersion>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listProjectVersions(name, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.listProjectVersions']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Activate a specific version
+         * @param {string} name Project name
+         * @param {string} versionName Version name to activate
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async activateProjectVersion(name: string, versionName: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectVersion>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.activateProjectVersion(name, versionName, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.activateProjectVersion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Delete a specific version
+         * @param {string} name Project name
+         * @param {string} versionName Version name to delete
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteProjectVersion(name: string, versionName: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteProjectVersion(name, versionName, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.deleteProjectVersion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -490,6 +658,33 @@ export const ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFactory = function (co
          */
         writeContentToFile(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiWriteContentToFileRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.writeContentToFile(requestParameters.name, requestParameters.path, requestParameters.writeContentRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List all versions for a project
+         * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProjectVersions(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<ProjectVersion>> {
+            return localVarFp.listProjectVersions(requestParameters.name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Activate a specific version
+         * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        activateProjectVersion(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProjectVersion> {
+            return localVarFp.activateProjectVersion(requestParameters.name, requestParameters.versionName, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Delete a specific version
+         * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteProjectVersion(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteProjectVersion(requestParameters.name, requestParameters.versionName, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -649,6 +844,62 @@ export interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiWriteContentToFile
 }
 
 /**
+ * Request parameters for listProjectVersions operation in ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.
+ * @export
+ * @interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest
+ */
+export interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest {
+    /**
+     * Project name
+     * @type {string}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersions
+     */
+    readonly name: string
+}
+
+/**
+ * Request parameters for activateProjectVersion operation in ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.
+ * @export
+ * @interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest
+ */
+export interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest {
+    /**
+     * Project name
+     * @type {string}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersion
+     */
+    readonly name: string
+
+    /**
+     * Version name to activate
+     * @type {string}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersion
+     */
+    readonly versionName: string
+}
+
+/**
+ * Request parameters for deleteProjectVersion operation in ConsoleApiStaticpageHaloRunV1alpha1ProjectApi.
+ * @export
+ * @interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest
+ */
+export interface ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest {
+    /**
+     * Project name
+     * @type {string}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersion
+     */
+    readonly name: string
+
+    /**
+     * Version name to delete
+     * @type {string}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersion
+     */
+    readonly versionName: string
+}
+
+/**
  * ConsoleApiStaticpageHaloRunV1alpha1ProjectApi - object-oriented interface
  * @export
  * @class ConsoleApiStaticpageHaloRunV1alpha1ProjectApi
@@ -719,6 +970,39 @@ export class ConsoleApiStaticpageHaloRunV1alpha1ProjectApi extends BaseAPI {
      */
     public writeContentToFile(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiWriteContentToFileRequest, options?: RawAxiosRequestConfig) {
         return ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFp(this.configuration).writeContentToFile(requestParameters.name, requestParameters.path, requestParameters.writeContentRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List all versions for a project
+     * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApi
+     */
+    public listProjectVersions(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiListProjectVersionsRequest, options?: RawAxiosRequestConfig) {
+        return ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFp(this.configuration).listProjectVersions(requestParameters.name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Activate a specific version
+     * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApi
+     */
+    public activateProjectVersion(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiActivateProjectVersionRequest, options?: RawAxiosRequestConfig) {
+        return ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFp(this.configuration).activateProjectVersion(requestParameters.name, requestParameters.versionName, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Delete a specific version
+     * @param {ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ConsoleApiStaticpageHaloRunV1alpha1ProjectApi
+     */
+    public deleteProjectVersion(requestParameters: ConsoleApiStaticpageHaloRunV1alpha1ProjectApiDeleteProjectVersionRequest, options?: RawAxiosRequestConfig) {
+        return ConsoleApiStaticpageHaloRunV1alpha1ProjectApiFp(this.configuration).deleteProjectVersion(requestParameters.name, requestParameters.versionName, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

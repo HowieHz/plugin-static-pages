@@ -54,6 +54,17 @@ function onSubmit(data: ProjectFormState) {
       :model-value="formState?.description"
       label="描述"
     ></FormKit>
+    <FormKit
+      type="number"
+      name="maxVersions"
+      :model-value="formState?.maxVersions ?? 5"
+      label="最大版本数"
+      help="保留的最大版本数量，0 表示无限制，默认为 5"
+      validation="required|min:0"
+      :validation-messages="{
+        min: '最小值为 0',
+      }"
+    ></FormKit>
     <!-- @vue-ignore -->
     <FormKit type="repeater" :value="formState?.rewrites" name="rewrites" label="重写规则">
       <FormKit type="text" name="source" label="源" validation="required"></FormKit>

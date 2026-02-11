@@ -11,6 +11,7 @@ export * from './project-list';
 export * from './project-rewrite';
 export * from './project-spec';
 export * from './project-status';
+export * from './project-version';
 export * from './remove-operation';
 export * from './replace-operation';
 export * from './test-operation';

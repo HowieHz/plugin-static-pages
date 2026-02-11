@@ -11,9 +11,11 @@ import static org.springdoc.core.fn.builders.requestbody.Builder.requestBodyBuil
 import static org.springdoc.core.fn.builders.schema.Builder.schemaBuilder;
 import static org.springframework.web.reactive.function.server.RequestPredicates.contentType;
 
+import cc.ryanc.staticpages.extensions.ProjectVersion;
 import cc.ryanc.staticpages.model.ProjectFile;
 import cc.ryanc.staticpages.model.UploadContext;
 import cc.ryanc.staticpages.service.PageProjectService;
+import cc.ryanc.staticpages.service.VersionService;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.nio.file.Path;
@@ -39,6 +41,7 @@ import run.halo.app.extension.GroupVersion;
 @Component
 public class PageProjectEndpoint implements CustomEndpoint {
     private final PageProjectService pageProjectService;
+    private final VersionService versionService;
 
     @Override
     public RouterFunction<ServerResponse> endpoint() {
@@ -156,7 +159,74 @@ public class PageProjectEndpoint implements CustomEndpoint {
                     .implementation(CreateFileRequest.class)
                 )
             )
+            // Version management endpoints
+            .GET("/projects/{name}/versions", this::listVersions, builder -> builder
+                .operationId("ListProjectVersions")
+                .tag(tag)
+                .parameter(parameterBuilder()
+                    .in(ParameterIn.PATH)
+                    .name("name")
+                    .required(true)
+                    .description("Project name")
+                )
+                .response(responseBuilder().implementationArray(ProjectVersion.class))
+            )
+            .POST("/projects/{name}/versions/{versionName}/activate", this::activateVersion, 
+                builder -> builder
+                    .operationId("ActivateProjectVersion")
+                    .tag(tag)
+                    .parameter(parameterBuilder()
+                        .in(ParameterIn.PATH)
+                        .name("name")
+                        .required(true)
+                        .description("Project name")
+                    )
+                    .parameter(parameterBuilder()
+                        .in(ParameterIn.PATH)
+                        .name("versionName")
+                        .required(true)
+                        .description("Version name to activate")
+                    )
+                    .response(responseBuilder().implementation(ProjectVersion.class))
+            )
+            .DELETE("/projects/{name}/versions/{versionName}", this::deleteVersion, 
+                builder -> builder
+                    .operationId("DeleteProjectVersion")
+                    .tag(tag)
+                    .parameter(parameterBuilder()
+                        .in(ParameterIn.PATH)
+                        .name("name")
+                        .required(true)
+                        .description("Project name")
+                    )
+                    .parameter(parameterBuilder()
+                        .in(ParameterIn.PATH)
+                        .name("versionName")
+                        .required(true)
+                        .description("Version name to delete")
+                    )
+                    .response(responseBuilder()
+                        .responseCode(String.valueOf(HttpStatus.NO_CONTENT.value())))
+            )
             .build();
+    }
+
+    private Mono<ServerResponse> listVersions(ServerRequest request) {
+        final var projectName = request.pathVariable("name");
+        return ServerResponse.ok()
+            .body(versionService.listVersions(projectName), ProjectVersion.class);
+    }
+
+    private Mono<ServerResponse> activateVersion(ServerRequest request) {
+        final var versionName = request.pathVariable("versionName");
+        return versionService.activateVersion(versionName)
+            .flatMap(version -> ServerResponse.ok().bodyValue(version));
+    }
+
+    private Mono<ServerResponse> deleteVersion(ServerRequest request) {
+        final var versionName = request.pathVariable("versionName");
+        return versionService.deleteVersion(versionName)
+            .then(ServerResponse.noContent().build());
     }
 
     private Mono<ServerResponse> createFile(ServerRequest request) {

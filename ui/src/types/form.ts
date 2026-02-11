@@ -6,4 +6,5 @@ export interface ProjectFormState {
   description?: string;
   directory: string;
   rewrites?: ProjectRewrite[];
+  maxVersions?: number;
 }

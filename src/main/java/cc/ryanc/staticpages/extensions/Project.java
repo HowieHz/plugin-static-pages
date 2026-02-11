@@ -46,6 +46,11 @@ public class Project extends AbstractExtension {
 
         @Schema(requiredMode = NOT_REQUIRED)
         private List<Rewrite> rewrites;
+
+        @Schema(requiredMode = NOT_REQUIRED, 
+                description = "Maximum number of versions to keep, 0 means unlimited",
+                defaultValue = "5")
+        private Integer maxVersions = 5;
     }
 
     @Data

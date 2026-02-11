@@ -53,6 +53,11 @@ const { mutate, isLoading } = useMutation({
           path: '/spec/rewrites',
           value: data.rewrites || [],
         },
+        {
+          op: 'add',
+          path: '/spec/maxVersions',
+          value: data.maxVersions ?? 5,
+        },
       ],
     });
   },
