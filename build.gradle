@@ -1,12 +1,22 @@
 plugins {
     id 'java'
     id "com.github.node-gradle.node" version "5.0.0"
-    id "io.freefair.lombok" version "8.0.1"
-    id "run.halo.plugin.devtools" version "0.1.1"
+    id "io.freefair.lombok" version "9.2.0"
+    id "run.halo.plugin.devtools" version "0.6.2"
 }
 
 group 'cc.ryanc.staticpages'
-sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(21)
+}
 
 repositories {
     mavenCentral()
@@ -16,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.11.0-SNAPSHOT')
+    implementation platform('run.halo.tools.platform:plugin:2.22.0')
     compileOnly 'run.halo.app:api'
 
     testImplementation 'run.halo.app:api'
@@ -25,10 +35,6 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = "UTF-8"
 }
 
 node {
@@ -52,7 +58,7 @@ build {
 }
 
 halo {
-    version = '2.21'
+    version = '2.22'
     debug = true
 }
 
