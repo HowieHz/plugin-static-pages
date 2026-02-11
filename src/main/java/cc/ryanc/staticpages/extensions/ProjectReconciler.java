@@ -51,10 +51,11 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
                     return;
                 }
                 
-                // Track if any changes were made
+                // Track if any changes were made to the project
                 boolean changed = false;
                 
-                // Add finalizer if not present (returns true if added, false if already exists)
+                // Add finalizer if not present
+                // (addFinalizers from Halo API returns true if added, false if already exists)
                 changed |= addFinalizers(project.getMetadata(), Set.of(FINALIZER));
                 
                 // Update rewrite rules (idempotent operation that doesn't modify the project object)
@@ -81,7 +82,8 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
             moveTo(project, oldDir, newPath);
         }
         
-        // Check if annotation needs to be updated (use Objects.equals for null safety)
+        // Check if annotation needs to be updated
+        // Returns true when oldDir differs from current directory (use Objects.equals for null safety)
         if (!Objects.equals(oldDir, directory)) {
             annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
             return true; // Annotation changed
