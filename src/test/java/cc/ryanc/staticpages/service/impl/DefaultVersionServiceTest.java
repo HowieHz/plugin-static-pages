@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import cc.ryanc.staticpages.extensions.Project;
 import cc.ryanc.staticpages.extensions.ProjectVersion;
+import cc.ryanc.staticpages.service.ProjectLockManager;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
@@ -38,11 +39,13 @@ class DefaultVersionServiceTest {
     private Path tempDir;
     
     private DefaultVersionService versionService;
+    private ProjectLockManager lockManager;
     
     @BeforeEach
     void setUp() {
         lenient().when(backupRootGetter.get()).thenReturn(tempDir.resolve("backup"));
-        versionService = new DefaultVersionService(client, backupRootGetter);
+        lockManager = new ProjectLockManager();
+        versionService = new DefaultVersionService(client, backupRootGetter, lockManager);
     }
     
     @Test

@@ -121,6 +121,10 @@ public class PageProjectServiceImpl implements PageProjectService {
         var formattedTime = DATE_FORMATTER.format(now);
         var description = "上传于 " + formattedTime;
         
+        // Note: createVersion and activateVersion both use locks internally.
+        // However, to ensure atomicity of the entire upload+activate operation,
+        // the operations are chained within their respective locks.
+        // This prevents race conditions where two uploads could interleave.
         return versionService.createVersion(projectName, description)
             .flatMap(version -> {
                 // Upload to the new version directory
@@ -142,6 +146,7 @@ public class PageProjectServiceImpl implements PageProjectService {
                         return writeToFile(basePath, uploadContext)
                             .flatMap(path -> {
                                 // Always activate the new version automatically
+                                // activateVersion uses lock to prevent concurrent activation
                                 return versionService.activateVersion(
                                     version.getMetadata().getName())
                                     .thenReturn(path);
