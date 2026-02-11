@@ -4,10 +4,12 @@ import static cc.ryanc.staticpages.utils.FileUtils.checkDirectoryTraversal;
 import static java.nio.file.StandardOpenOption.CREATE;
 
 import cc.ryanc.staticpages.extensions.Project;
+import cc.ryanc.staticpages.extensions.ProjectVersion;
 import cc.ryanc.staticpages.model.ProjectFile;
 import cc.ryanc.staticpages.model.UploadContext;
 import cc.ryanc.staticpages.service.PageFileManager;
 import cc.ryanc.staticpages.service.PageProjectService;
+import cc.ryanc.staticpages.service.VersionService;
 import cc.ryanc.staticpages.utils.FileUtils;
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +39,7 @@ public class PageProjectServiceImpl implements PageProjectService {
     private final ReactiveExtensionClient client;
     private final BackupRootGetter backupRootGetter;
     private final PageFileManager pageFileManager;
+    private final VersionService versionService;
 
     private static String getType(File file) {
         String name = file.getName();
@@ -107,22 +110,53 @@ public class PageProjectServiceImpl implements PageProjectService {
 
     @Override
     public Mono<Path> upload(UploadContext uploadContext) {
-        return client.get(Project.class, uploadContext.getName())
-            .map(project -> extractProjectFilePath(project, uploadContext.getDir()))
-            .flatMap(storePath -> writeToFile(storePath, uploadContext));
+        var projectName = uploadContext.getName();
+        
+        return versionService.createVersion(projectName, "Upload at " + Instant.now())
+            .flatMap(version -> {
+                // Upload to the new version directory
+                return client.get(Project.class, projectName)
+                    .flatMap(project -> {
+                        var versionDir = version.getSpec().getDirectory();
+                        var projectDir = project.getSpec().getDirectory();
+                        var uploadDir = uploadContext.getDir();
+                        
+                        // Build path: static/{projectDir}/{versionDir}/{uploadDir}
+                        Path basePath = getStaticRootPath()
+                            .resolve(projectDir)
+                            .resolve(versionDir);
+                        
+                        if (StringUtils.isNotBlank(uploadDir)) {
+                            basePath = concatPath(basePath, pathSegments(uploadDir));
+                        }
+                        
+                        return writeToFile(basePath, uploadContext)
+                            .flatMap(path -> {
+                                // If this is the first version, activate it automatically
+                                return versionService.listVersions(projectName)
+                                    .collectList()
+                                    .flatMap(versions -> {
+                                        if (versions.size() == 1) {
+                                            return versionService.activateVersion(
+                                                version.getMetadata().getName());
+                                        }
+                                        return Mono.just(version);
+                                    })
+                                    .thenReturn(path);
+                            });
+                    });
+            });
     }
 
     @Override
     public Flux<ProjectFile> listFiles(String name, String directoryPath) {
-        return client.get(Project.class, name)
-            .map(project -> extractProjectFilePath(project, directoryPath))
+        return extractProjectFilePathWithVersion(name, directoryPath)
             .flatMapMany(PageProjectServiceImpl::doListFiles);
     }
 
     @Override
     public Mono<Boolean> deleteFile(String projectName, String path) {
-        return client.get(Project.class, projectName)
-            .map(project -> extractProjectFilePath(project, path))
+        return extractProjectFilePathWithVersion(projectName, path)
             .flatMap(filePath -> Mono.fromCallable(
                     () -> FileSystemUtils.deleteRecursively(filePath))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -131,22 +165,19 @@ public class PageProjectServiceImpl implements PageProjectService {
 
     @Override
     public Mono<String> readFileContent(String projectName, String path) {
-        return client.get(Project.class, projectName)
-            .map(project -> extractProjectFilePath(project, path))
+        return extractProjectFilePathWithVersion(projectName, path)
             .flatMap(pageFileManager::readString);
     }
 
     @Override
     public Mono<Void> writeContent(String projectName, String path, String content) {
-        return client.get(Project.class, projectName)
-            .map(project -> extractProjectFilePath(project, path))
+        return extractProjectFilePathWithVersion(projectName, path)
             .flatMap(filePath -> pageFileManager.writeString(filePath, content));
     }
 
     @Override
     public Mono<Path> createFile(String projectName, String path, boolean dir) {
-        return client.get(Project.class, projectName)
-            .map(project -> extractProjectFilePath(project, path))
+        return extractProjectFilePathWithVersion(projectName, path)
             .flatMap(filePath -> pageFileManager.createFile(filePath, dir).thenReturn(filePath));
     }
 
@@ -169,6 +200,26 @@ public class PageProjectServiceImpl implements PageProjectService {
     Path extractProjectFilePath(Project project, String extractPath) {
         var segments = pathSegments(extractPath);
         return concatPath(determineProjectPath(project.getSpec().getDirectory()), segments);
+    }
+    
+    /**
+     * Extract project file path with version support
+     */
+    Mono<Path> extractProjectFilePathWithVersion(String projectName, String extractPath) {
+        return client.get(Project.class, projectName)
+            .flatMap(project -> versionService.getActiveVersion(projectName)
+                .map(version -> {
+                    var projectDir = project.getSpec().getDirectory();
+                    var versionDir = version.getSpec().getDirectory();
+                    var segments = pathSegments(extractPath);
+                    
+                    Path basePath = getStaticRootPath()
+                        .resolve(projectDir)
+                        .resolve(versionDir);
+                    
+                    return concatPath(basePath, segments);
+                })
+                .defaultIfEmpty(extractProjectFilePath(project, extractPath)));
     }
 
     private Path determineProjectPath(String projectDir) {
