@@ -10,6 +10,7 @@ import cc.ryanc.staticpages.service.ProjectRewriteRules;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,7 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
         }
         
         // Check if annotation needs to be updated (use Objects.equals for null safety)
-        if (!java.util.Objects.equals(oldDir, directory)) {
+        if (!Objects.equals(oldDir, directory)) {
             annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
             return true; // Annotation changed
         }
