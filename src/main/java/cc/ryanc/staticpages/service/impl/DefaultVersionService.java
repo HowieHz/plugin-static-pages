@@ -107,7 +107,7 @@ public class DefaultVersionService implements VersionService {
                             return true;
                         }).subscribeOn(Schedulers.boundedElastic());
                     })
-                    .then(client.delete(version));
+                    .then(client.delete(version).then());
             });
     }
     
