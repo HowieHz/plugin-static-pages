@@ -77,7 +77,7 @@ public class DefaultVersionService implements VersionService {
                         // Activate this version
                         version.getSpec().setActive(true);
                         return client.update(version)
-                            .flatMap(v -> updateSymbolicLink(projectName, v).thenReturn(v));
+                            .flatMap(v -> copyVersionToRoot(projectName, v).thenReturn(v));
                     }));
             });
     }
@@ -162,31 +162,53 @@ public class DefaultVersionService implements VersionService {
     }
     
     /**
-     * Update symbolic link to point to active version
+     * Copy version files to project root directory
      */
-    private Mono<Void> updateSymbolicLink(String projectName, ProjectVersion version) {
+    private Mono<Void> copyVersionToRoot(String projectName, ProjectVersion version) {
         return client.get(Project.class, projectName)
             .flatMap(project -> Mono.fromCallable(() -> {
                 Path projectPath = getStaticRootPath().resolve(project.getSpec().getDirectory());
-                Path currentLink = projectPath.resolve("current");
                 Path versionPath = projectPath.resolve(version.getSpec().getDirectory());
                 
                 try {
-                    // Remove existing link if it exists
-                    if (Files.exists(currentLink)) {
-                        if (Files.isSymbolicLink(currentLink)) {
-                            Files.delete(currentLink);
-                        } else {
-                            // If it's a regular directory, we need to handle this differently
-                            log.warn("'current' exists but is not a symbolic link, deleting it");
-                            FileSystemUtils.deleteRecursively(currentLink);
-                        }
+                    // Create project directory if it doesn't exist
+                    Files.createDirectories(projectPath);
+                    
+                    // Clear project root (except .versions directory)
+                    if (Files.exists(projectPath) && Files.isDirectory(projectPath)) {
+                        Files.list(projectPath)
+                            .filter(path -> !path.getFileName().toString().equals("versions"))
+                            .forEach(path -> {
+                                try {
+                                    FileSystemUtils.deleteRecursively(path);
+                                } catch (IOException e) {
+                                    log.warn("Failed to delete {}: {}", path, e.getMessage());
+                                }
+                            });
                     }
                     
-                    // Create new symbolic link
-                    Files.createSymbolicLink(currentLink, versionPath);
-                    log.info("Updated symbolic link for project {} to version {}", 
-                        projectName, version.getSpec().getVersion());
+                    // Copy files from version directory to project root
+                    if (Files.exists(versionPath) && Files.isDirectory(versionPath)) {
+                        Files.walk(versionPath)
+                            .forEach(source -> {
+                                try {
+                                    Path destination = projectPath.resolve(
+                                        versionPath.relativize(source));
+                                    if (Files.isDirectory(source)) {
+                                        Files.createDirectories(destination);
+                                    } else {
+                                        Files.copy(source, destination, 
+                                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                                    }
+                                } catch (IOException e) {
+                                    log.warn("Failed to copy {} to {}: {}", 
+                                        source, projectPath, e.getMessage());
+                                }
+                            });
+                    }
+                    
+                    log.info("Copied version {} to project root for project {}", 
+                        version.getSpec().getVersion(), projectName);
                 } catch (IOException e) {
                     throw Exceptions.propagate(e);
                 }
