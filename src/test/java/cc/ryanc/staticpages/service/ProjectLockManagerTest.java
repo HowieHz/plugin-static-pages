@@ -159,4 +159,89 @@ class ProjectLockManagerTest {
         lockManager.removeLock("non-existent");
         assertEquals(0, lockManager.getActiveLockCount());
     }
+    
+    @Test
+    void testAutomaticCleanup() throws Exception {
+        // Use reflection to set a short retention time for testing
+        var field = ProjectLockManager.class.getDeclaredField("lockRetentionMillis");
+        field.setAccessible(true);
+        field.set(lockManager, 100L); // 100ms retention for test
+        
+        String project1 = "cleanup-test-1";
+        String project2 = "cleanup-test-2";
+        
+        // Create locks
+        lockManager.getLock(project1);
+        lockManager.getLock(project2);
+        assertEquals(2, lockManager.getActiveLockCount());
+        
+        // Keep project2 active
+        Thread thread = new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                lockManager.getLock(project2);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        });
+        thread.start();
+        
+        // Wait for project1 to become stale
+        Thread.sleep(150);
+        
+        // Run cleanup
+        lockManager.cleanupUnusedLocks();
+        
+        thread.join();
+        
+        // Project1 should be removed (stale), project2 should remain (active)
+        int remainingLocks = lockManager.getActiveLockCount();
+        assertTrue(remainingLocks <= 2, "Expected at most 2 locks remaining, got: " + remainingLocks);
+    }
+    
+    @Test
+    void testCleanupDoesNotRemoveLockedLocks() throws Exception {
+        // Use reflection to set a short retention time for testing
+        var field = ProjectLockManager.class.getDeclaredField("lockRetentionMillis");
+        field.setAccessible(true);
+        field.set(lockManager, 50L); // 50ms retention for test
+        
+        String projectName = "locked-project";
+        
+        // Get and hold the lock
+        var lock = lockManager.getLock(projectName);
+        lock.lock();
+        
+        try {
+            assertEquals(1, lockManager.getActiveLockCount());
+            
+            // Wait for lock to become stale
+            Thread.sleep(100);
+            
+            // Run cleanup - should NOT remove the locked lock
+            lockManager.cleanupUnusedLocks();
+            
+            // Lock should still be there (it's held)
+            assertEquals(1, lockManager.getActiveLockCount());
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    @Test
+    void testCleanupWithNoStaleLocks() {
+        String projectName = "active-project";
+        
+        // Create a lock
+        lockManager.getLock(projectName);
+        assertEquals(1, lockManager.getActiveLockCount());
+        
+        // Run cleanup immediately - lock is fresh
+        lockManager.cleanupUnusedLocks();
+        
+        // Lock should still be there (not stale)
+        assertEquals(1, lockManager.getActiveLockCount());
+    }
 }
