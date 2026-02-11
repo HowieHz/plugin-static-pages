@@ -1,7 +1,5 @@
 package cc.ryanc.staticpages.extensions;
 
-import java.time.Duration;
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.ExtensionClient;
@@ -16,17 +14,10 @@ public class ProjectVersionReconciler implements Reconciler<Reconciler.Request> 
     
     @Override
     public Result reconcile(Request request) {
-        return client.fetch(ProjectVersion.class, request.name())
-            .map(version -> {
-                // Update last modified timestamp
-                if (version.getStatus() == null) {
-                    version.setStatus(new ProjectVersion.Status());
-                }
-                version.getStatus().setLastModified(Instant.now());
-                client.update(version);
-                return Result.doNotRetry();
-            })
-            .orElse(Result.doNotRetry());
+        // No-op reconciler - ProjectVersion lifecycle is managed by VersionService
+        // Attempting to fetch and update on every reconciliation can cause timeouts
+        // and unnecessary reconciliation loops
+        return Result.doNotRetry();
     }
     
     @Override
