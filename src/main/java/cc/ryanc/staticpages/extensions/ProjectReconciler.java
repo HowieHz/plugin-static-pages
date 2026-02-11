@@ -46,17 +46,31 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
                         client.update(project);
                         return;
                     }
+                    // No changes made, finalizer already removed
+                    return;
                 }
-                addFinalizers(project.getMetadata(), Set.of(FINALIZER));
+                
+                // Track if any changes were made
+                boolean changed = false;
+                
+                // Add finalizer if not present
+                changed |= addFinalizers(project.getMetadata(), Set.of(FINALIZER));
+                
+                // Update rewrite rules (idempotent operation, no need to track)
                 projectRewriteRules.updateRules(project);
-                handleDirectoryChange(project);
+                
+                // Handle directory changes
+                changed |= handleDirectoryChange(project);
 
-                client.update(project);
+                // Only update if something changed to avoid unnecessary reconciliation loops
+                if (changed) {
+                    client.update(project);
+                }
             });
         return Result.doNotRetry();
     }
 
-    private void handleDirectoryChange(Project project) {
+    private boolean handleDirectoryChange(Project project) {
         var annotations = MetadataUtil.nullSafeAnnotations(project);
         var directory = project.getSpec().getDirectory();
         var oldDir = annotations.get(Project.LAST_DIRECTORY_ANNO);
@@ -65,7 +79,13 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
         if (shouldMove(oldDir, directory, newPath)) {
             moveTo(project, oldDir, newPath);
         }
-        annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
+        
+        // Check if annotation needs to be updated
+        if (!directory.equals(oldDir)) {
+            annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
+            return true; // Annotation changed
+        }
+        return false; // No changes
     }
 
     boolean shouldMove(String oldDir, String newDir, Path newPath) {
