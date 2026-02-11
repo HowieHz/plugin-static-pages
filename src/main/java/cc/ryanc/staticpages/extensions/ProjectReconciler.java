@@ -10,6 +10,7 @@ import cc.ryanc.staticpages.service.ProjectRewriteRules;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,17 +47,32 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
                         client.update(project);
                         return;
                     }
+                    // No changes made, finalizer already removed
+                    return;
                 }
-                addFinalizers(project.getMetadata(), Set.of(FINALIZER));
+                
+                // Track if any changes were made to the project
+                boolean changed = false;
+                
+                // Add finalizer if not present
+                // (addFinalizers from Halo API returns true if added, false if already exists)
+                changed |= addFinalizers(project.getMetadata(), Set.of(FINALIZER));
+                
+                // Update rewrite rules (idempotent operation that doesn't modify the project object)
                 projectRewriteRules.updateRules(project);
-                handleDirectoryChange(project);
+                
+                // Handle directory changes
+                changed |= handleDirectoryChange(project);
 
-                client.update(project);
+                // Only update if something changed to avoid unnecessary reconciliation loops
+                if (changed) {
+                    client.update(project);
+                }
             });
         return Result.doNotRetry();
     }
 
-    private void handleDirectoryChange(Project project) {
+    private boolean handleDirectoryChange(Project project) {
         var annotations = MetadataUtil.nullSafeAnnotations(project);
         var directory = project.getSpec().getDirectory();
         var oldDir = annotations.get(Project.LAST_DIRECTORY_ANNO);
@@ -65,7 +81,14 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
         if (shouldMove(oldDir, directory, newPath)) {
             moveTo(project, oldDir, newPath);
         }
-        annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
+        
+        // Check if annotation needs to be updated
+        // Returns true when oldDir differs from current directory (use Objects.equals for null safety)
+        if (!Objects.equals(oldDir, directory)) {
+            annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
+            return true; // Annotation changed
+        }
+        return false; // No changes
     }
 
     boolean shouldMove(String oldDir, String newDir, Path newPath) {
