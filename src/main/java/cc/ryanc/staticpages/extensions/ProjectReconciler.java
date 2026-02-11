@@ -56,7 +56,7 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
                 // Add finalizer if not present (returns true if added, false if already exists)
                 changed |= addFinalizers(project.getMetadata(), Set.of(FINALIZER));
                 
-                // Update rewrite rules (idempotent operation, no need to track)
+                // Update rewrite rules (idempotent operation that doesn't modify the project object)
                 projectRewriteRules.updateRules(project);
                 
                 // Handle directory changes
@@ -81,7 +81,7 @@ public class ProjectReconciler implements Reconciler<Reconciler.Request> {
         }
         
         // Check if annotation needs to be updated (use Objects.equals for null safety)
-        if (!java.util.Objects.equals(directory, oldDir)) {
+        if (!java.util.Objects.equals(oldDir, directory)) {
             annotations.put(Project.LAST_DIRECTORY_ANNO, directory);
             return true; // Annotation changed
         }
