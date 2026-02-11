@@ -187,21 +187,22 @@ public class DefaultVersionService implements VersionService {
                     
                     // Clear project root (except .versions directory)
                     if (Files.exists(projectPath) && Files.isDirectory(projectPath)) {
-                        Files.list(projectPath)
-                            .filter(path -> !path.getFileName().toString().equals(VERSIONS_DIR))
-                            .forEach(path -> {
-                                try {
-                                    FileSystemUtils.deleteRecursively(path);
-                                } catch (IOException e) {
-                                    log.warn("Failed to delete {}: {}", path, e.getMessage());
-                                }
-                            });
+                        try (var files = Files.list(projectPath)) {
+                            files.filter(path -> !path.getFileName().toString().equals(VERSIONS_DIR))
+                                .forEach(path -> {
+                                    try {
+                                        FileSystemUtils.deleteRecursively(path);
+                                    } catch (IOException e) {
+                                        log.warn("Failed to delete {}: {}", path, e.getMessage());
+                                    }
+                                });
+                        }
                     }
                     
                     // Copy files from version directory to project root
                     if (Files.exists(versionPath) && Files.isDirectory(versionPath)) {
-                        Files.walk(versionPath)
-                            .forEach(source -> {
+                        try (var paths = Files.walk(versionPath)) {
+                            paths.forEach(source -> {
                                 try {
                                     Path destination = projectPath.resolve(
                                         versionPath.relativize(source));
@@ -216,6 +217,7 @@ public class DefaultVersionService implements VersionService {
                                         source, projectPath, e.getMessage());
                                 }
                             });
+                        }
                     }
                     
                     log.info("Copied version {} to project root for project {}", 
